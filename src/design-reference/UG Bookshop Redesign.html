@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kingdom Books — UG Bookshop Redesign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    input, button { font-family: inherit; }
+    ::-webkit-scrollbar { width: 0; height: 0; }
+  </style>
+</head>
+<body>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="browser-window.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script type="text/babel" src="screens/HomeMobile.jsx"></script>
+<script type="text/babel" src="screens/HomeDesktop.jsx"></script>
+<script type="text/babel" src="screens/SearchMobile.jsx"></script>
+<script type="text/babel" src="screens/SearchDesktop.jsx"></script>
+<script type="text/babel" src="screens/ProductMobile.jsx"></script>
+<script type="text/babel" src="screens/ProductDesktop.jsx"></script>
+<script type="text/babel" src="screens/CheckoutMobile.jsx"></script>
+<script type="text/babel" src="screens/CheckoutDesktop.jsx"></script>
+<script type="text/babel" src="screens/SignInMobile.jsx"></script>
+<script type="text/babel" src="screens/AboutMobile.jsx"></script>
+<script type="text/babel" src="screens/AdminDashboard.jsx"></script>
+<script type="text/babel" src="screens/AdminProducts.jsx"></script>
+<script type="text/babel" src="screens/AdminReports.jsx"></script>
+
+<script type="text/babel">
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "navyColor": "#001a36",
+  "goldColor": "#C9920A"
+}/*EDITMODE-END*/;
+
+// Wrap a screen in an iOS frame
+function MobileFrame({ children }) {
+  return (
+    <IOSDevice width={402} height={874} dark={false}>
+      {children}
+    </IOSDevice>
+  );
+}
+
+// Wrap a desktop screen in a browser window
+function DesktopFrame({ url, title, children }) {
+  return (
+    <ChromeWindow
+      tabs={[{ title }]}
+      activeIndex={0}
+      url={url}
+      width={1280}
+      height={800}
+    >
+      {children}
+    </ChromeWindow>
+  );
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const noop = () => {};
+
+  return (
+    <DesignCanvas>
+      <DCSection
+        id="mobile"
+        title="Mobile · iPhone 14 Pro"
+        subtitle="402 × 874 — Phase 1: 4 mobile flows"
+      >
+        <DCArtboard id="m-home" label="01 — Homepage" width={402} height={874}>
+          <MobileFrame><HomeMobile onNavigate={noop} /></MobileFrame>
+        </DCArtboard>
+        <DCArtboard id="m-search" label="02 — Search Results" width={402} height={874}>
+          <MobileFrame><SearchMobile onNavigate={noop} /></MobileFrame>
+        </DCArtboard>
+        <DCArtboard id="m-product" label="03 — Product Detail" width={402} height={874}>
+          <MobileFrame><ProductMobile onNavigate={noop} /></MobileFrame>
+        </DCArtboard>
+        <DCArtboard id="m-checkout" label="04 — Checkout · Payment" width={402} height={874}>
+          <MobileFrame><CheckoutMobile onNavigate={noop} /></MobileFrame>
+        </DCArtboard>
+        <DCArtboard id="m-signin" label="05 — Sign In / Register" width={402} height={874}>
+          <MobileFrame><SignInMobile onNavigate={noop} /></MobileFrame>
+        </DCArtboard>
+        <DCArtboard id="m-about" label="06 — About Us" width={402} height={874}>
+          <MobileFrame><AboutMobile onNavigate={noop} /></MobileFrame>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="desktop"
+        title="Desktop · Browser"
+        subtitle="1280 × 800 — Same flows, full-width compositions"
+      >
+        <DCArtboard id="d-home" label="01 — Homepage" width={1280} height={800}>
+          <DesktopFrame url="kingdombooksug.com" title="Kingdom Books — UG Bookshop">
+            <HomeDesktop onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+        <DCArtboard id="d-search" label="02 — Search Results" width={1280} height={800}>
+          <DesktopFrame url="kingdombooksug.com/search?q=accounting" title="Search · Accounting — Kingdom Books">
+            <SearchDesktop onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+        <DCArtboard id="d-product" label="03 — Product Detail" width={1280} height={800}>
+          <DesktopFrame url="kingdombooksug.com/p/financial-accounting-weetman" title="Financial Accounting — Kingdom Books">
+            <ProductDesktop onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+        <DCArtboard id="d-checkout" label="04 — Checkout · Payment" width={1280} height={800}>
+          <DesktopFrame url="kingdombooksug.com/checkout/payment" title="Secure Checkout — Kingdom Books">
+            <CheckoutDesktop onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+        <DCArtboard id="d-admin" label="05 — Admin Dashboard" width={1280} height={800}>
+          <DesktopFrame url="admin.kingdombooksug.com/dashboard" title="Admin · Dashboard — Kingdom Books">
+            <AdminDashboard onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+        <DCArtboard id="d-admin-products" label="06A — Admin · Products & Inventory" width={1280} height={800}>
+          <DesktopFrame url="admin.kingdombooksug.com/products" title="Admin · Products — Kingdom Books">
+            <AdminProducts onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+        <DCArtboard id="d-admin-reports" label="06B — Admin · Reports & Analytics" width={1280} height={800}>
+          <DesktopFrame url="admin.kingdombooksug.com/reports" title="Admin · Reports — Kingdom Books">
+            <AdminReports onNavigate={noop} />
+          </DesktopFrame>
+        </DCArtboard>
+      </DCSection>
+
+      <TweaksPanel>
+        <TweakSection label="Brand Colors" />
+        <TweakColor label="Navy" value={t.navyColor} onChange={v => setTweak('navyColor', v)} />
+        <TweakColor label="Gold" value={t.goldColor} onChange={v => setTweak('goldColor', v)} />
+      </TweaksPanel>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+<div id="root"></div>
+</body>
+</html>
