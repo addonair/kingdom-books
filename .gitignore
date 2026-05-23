@@ -1,3 +1,10 @@
+# Claude Code local settings (machine-specific paths)
+.claude/settings.local.json
+.claude/settings.json
+
+# Environment variables
+.env
+
 # Logs
 logs
 *.log
@@ -11,6 +18,12 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Local screenshot dumps (UI references; keep curated assets in screen shots/)
+/*.png
+/*.jpg
+/*.jpeg
+.playwright-mcp/
 
 # Editor directories and files
 .vscode/*

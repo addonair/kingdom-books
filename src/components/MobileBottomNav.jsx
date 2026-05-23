@@ -34,7 +34,7 @@ const tabs = [
     ),
   },
   {
-    to: '/login',
+    to: '/account',
     label: 'Account',
     icon: (active) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">

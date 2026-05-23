@@ -1,0 +1,385 @@
+# CLAUDE.md — Kingdom Books
+
+Onboarding reference for working in this repo. Update it when the structure or conventions below change.
+
+## 1. Overview
+
+Kingdom Books & Stationery is an e-commerce front end for a University of Ghana bookstore. It serves a public storefront (browse, cart, checkout, payment callback, account/orders) and a role-gated admin dashboard (products, orders, customers, categories, promotions, reports, settings).
+
+**Stack**
+
+| Layer | Choice | Version |
+|------|--------|---------|
+| Framework | React | 19.2.5 |
+| Bundler | Vite | 8.0.10 |
+| Routing | react-router-dom | 7.14.2 |
+| HTTP | axios | 1.15.2 |
+| Styling | Tailwind CSS | 3.4.19 |
+| Charts | recharts | 3.8.1 |
+| Icons | react-icons | 5.6.0 |
+| Lint | eslint flat config + react-hooks + react-refresh | 10.x |
+
+**Backend assumption:** REST API at `http://localhost:5000/api` (hardcoded — see Gotchas).
+
+**Scripts**
+
+```
+npm run dev      # Vite dev server
+npm run build    # Production build
+npm run lint     # ESLint
+npm run preview  # Preview built bundle
+```
+
+## 2. Project structure
+
+```
+kingdom-books/
+├── index.html              # Loads /src/main.jsx; Google Fonts (DM Sans, DM Serif Display)
+├── package.json
+├── vite.config.js          # Vite + @vitejs/plugin-react
+├── tailwind.config.js      # Brand tokens, fonts (see §6)
+├── postcss.config.js
+├── eslint.config.js        # Flat config
+├── public/                 # Static assets
+├── screen shots/           # Manual QA screenshots
+└── src/
+    ├── main.jsx            # Entry: BrowserRouter > AuthProvider > CartProvider > <App />
+    ├── App.jsx             # All <Route> definitions (see §3)
+    ├── index.css           # Tailwind directives + base styles
+    ├── api/                # Axios client + per-domain modules (see §5)
+    ├── components/         # Reusable UI (see §7)
+    ├── context/            # AuthContext, CartContext (see §4)
+    ├── data/               # Static fallback data
+    ├── layouts/            # MainLayout (public)
+    ├── pages/              # Public pages (12) + admin/ subfolder (10)
+    └── design-reference/   # Non-functional design canvas + Figma exports
+```
+
+### File-by-file map for `src/`
+
+**src/api/** — Axios client + per-domain modules. See §5 for endpoints.
+
+| File | Purpose |
+|------|---------|
+| `client.js` | Axios instance; `Authorization: Bearer ${kb_token}` interceptor; logs requests + headers |
+| `auth.js` | `register`, `login`, `getMe` |
+| `products.js` | `getProducts(filters)`, `getProduct(id)` |
+| `cart.js` | `getCart`, `addToCart`, `removeFromCart` |
+| `orders.js` | `createOrder`, `getOrders`, `getOrder` |
+| `categories.js` | `getCategories` (may 404 — fall back to `data/categories.js`) |
+| `payment.js` | `initializePayment`, `verifyPayment` |
+| `homepage.js` | Public `getHomepage()` — reads the CMS-driven homepage section list |
+| `admin.js` | All `/admin/*` endpoints (stats, orders, products, customers, categories, promotions, reports, settings, **homepage CMS**) |
+| `productMapper.js` | Backend → UI shape transform; helpers: `mapProduct`, `mapProducts`, `categorySlugForName`, `deriveShape` |
+
+**src/components/**
+
+| File | Purpose |
+|------|---------|
+| `Modal.jsx` | Generic dialog with Esc-close + scrim |
+| `Navbar.jsx` | Header with Books/Stationery mega menus, cart badge, account dropdown |
+| `MobileBottomNav.jsx` | Mobile fixed bottom tabs (Home, Search, Orders, Account) |
+| `RequireAdmin.jsx` | Route guard — redirects non-admins to `/admin/login`, renders `<Outlet />` |
+| `Footer.jsx` | Desktop-only footer (copyright + Privacy/Terms/Contact) |
+| `homepage/` | Six presentational section components (`AnnouncementBarSection`, `HeroSection`, `CategoriesSection`, `BestsellersSection`, `FeaturesSection`, `AboutSection`) shared by the public `HomePage` and the admin live preview |
+
+**src/context/**
+
+| File | Purpose |
+|------|---------|
+| `AuthContext.jsx` | Global auth state + `useAuth()` hook |
+| `CartContext.jsx` | Global cart state + `useCart()` hook (server-synced when authenticated) |
+
+**src/data/** — static fallback used when backend endpoints are unavailable.
+
+| File | Purpose |
+|------|---------|
+| `categories.js` | `CATEGORY_TREE` (3-level), `POPULAR_AUTHORS`, `STATIONERY_BRANDS`, `CONDITIONS`, `PRICE_MIN/MAX`, helpers |
+| `products.js` | Seed product array + `categories`, `subcatsByCat`, `formats`, `conditions`, `sortOptions`, `getProductById(id)` |
+
+**src/layouts/**
+
+| File | Purpose |
+|------|---------|
+| `MainLayout.jsx` | Public shell: sticky `<Navbar>` + `<Outlet />` + `<Footer>` + `<MobileBottomNav>` (announcement bar is now a homepage-only CMS section, no longer site-wide) |
+| `AdminLayout.jsx` | Sidebar + nav + outlet shell for the admin section |
+
+**src/pages/** (public — 12 pages, all use `MainLayout`)
+
+| File | Purpose |
+|------|---------|
+| `HomePage.jsx` | Renders hardcoded sections (announcement, hero, categories, bestsellers, features, about) immediately on mount — no skeleton, no blank state. `GET /api/homepage` runs in `useEffect` as a non-breaking overlay: when it succeeds, individual API fields override the hardcoded values via optional chaining; when it fails, returns empty, or hangs, the page keeps rendering from hardcoded content. Format strip + featured trio are hardcoded between sections (not CMS-editable). |
+| `ShopPage.jsx` | Filterable product grid (category, subcategory, item type, author, brand, condition, price, search) |
+| `ProductPage.jsx` | Product detail; specs, format selector, related products, placeholder reviews |
+| `CartPage.jsx` | Line items, qty controls, delivery fee calc, checkout CTA |
+| `CheckoutPage.jsx` | Delivery → payment → confirm; creates order then initializes payment. Delivery step has two modes: **Home/Community** (house no, street, community, city, Ghana Post GPS code — all three required fields; Google Maps preview iframe + Open-in-Maps link; GPS code finder link to ghanapostgps.com) and **Store Pickup** (info card from `src/config/delivery.js` with address, GPS, hours, Google Maps link). |
+| `PaymentVerifyPage.jsx` | Payment callback; auto-redirects to `/orders` on success |
+| `OrdersPage.jsx` | User's order history with status badges |
+| `OrderDetailPage.jsx` | Full order detail view at `/orders/:id` — order header (ref, date, status), visual status timeline (3-step: Placed → Processing → Delivered; cancelled state shown separately in red), items list with colour-swatch thumbnails, delivery info (auto-detects pickup vs home), payment info, order total. Cancel button visible for `pending`/`processing` orders — triggers a confirmation modal; calls `PATCH /orders/:id/cancel` and updates status in place. |
+| `AccountPage.jsx` | Profile header + menu rows (Orders, Wishlist, Settings, Logout) |
+| `LoginPage.jsx` | Email + password login |
+| `ForgotPasswordPage.jsx` | Email form → `POST /auth/forgot-password`; always shows success state to avoid leaking whether an email is registered |
+| `RegisterPage.jsx` | Name, email, password, confirm |
+| `AboutPage.jsx` | Static brand story |
+| `ContactPage.jsx` | Contact form + contact info cards |
+
+**src/pages/admin/** (10 files; all but `AdminLoginPage` are guarded by `RequireAdmin` → wrapped in `AdminLayout` from `src/layouts/`)
+
+| File | Purpose |
+|------|---------|
+| `AdminLoginPage.jsx` | Admin login (validates `role === 'admin'`) |
+| `AdminDashboardPage.jsx` | Stat cards, recent orders, top products |
+| `AdminHomepagePage.jsx` | Homepage CMS editor: tabbed editor + live scaled-DOM preview (desktop/mobile), drag-to-reorder section strip with visibility toggles, per-section save with toast feedback |
+| `AdminProductsPage.jsx` | CRUD products via modal forms |
+| `AdminOrdersPage.jsx` | Status tabs (all/pending/processing/delivered) + inline status updates |
+| `AdminCustomersPage.jsx` | Role assignment + suspend/unsuspend toggle |
+| `AdminCategoriesPage.jsx` | CRUD categories |
+| `AdminPromotionsPage.jsx` | List + create promotion codes |
+| `AdminReportsPage.jsx` | Recharts bar/pie analytics |
+| `AdminSettingsPage.jsx` | Store settings + admin password change |
+
+**src/design-reference/** — design canvas + Figma exports + screen mockups. Non-functional; safe to ignore at build time.
+
+## 3. Routes
+
+```
+/                                  MainLayout (Navbar + Footer + MobileBottomNav)
+├── (index)                        HomePage
+├── /shop                          ShopPage           ← ?mainCategory, ?subCategory, ?itemType, ?author, ?filter
+├── /product/:id                   ProductPage
+├── /login, /register              LoginPage, RegisterPage
+├── /forgot-password               ForgotPasswordPage
+├── /about, /contact               AboutPage, ContactPage
+├── /cart, /checkout               CartPage, CheckoutPage
+├── /checkout/verify               PaymentVerifyPage  ← payment callback
+├── /orders, /account              OrdersPage, AccountPage
+
+/admin/login                       AdminLoginPage     (no layout, public)
+
+/admin                             RequireAdmin > AdminLayout
+├── (index)                        AdminDashboardPage
+├── /admin/homepage                AdminHomepagePage
+├── /admin/products                AdminProductsPage
+├── /admin/orders                  AdminOrdersPage
+├── /admin/customers               AdminCustomersPage
+├── /admin/categories              AdminCategoriesPage
+├── /admin/promotions              AdminPromotionsPage
+├── /admin/reports                 AdminReportsPage
+└── /admin/settings                AdminSettingsPage
+```
+
+`RequireAdmin` (`src/components/RequireAdmin.jsx`) checks `useAuth().user?.role === 'admin'` and redirects to `/admin/login` otherwise.
+
+There is a 404 catch-all (`NotFoundPage` in `App.jsx`) for unknown paths inside the public layout.
+
+## 4. Context providers
+
+Both providers are mounted in `src/main.jsx` (AuthProvider outside CartProvider so cart can read user).
+
+### AuthContext (`src/context/AuthContext.jsx`)
+
+| Field | Type / Signature |
+|-------|------------------|
+| `user` | `object \| null` |
+| `loading` | `boolean` (true during initial token check) |
+| `login(email, password)` | async → `user` |
+| `register(name, email, password)` | async → `user` |
+| `logout()` | void |
+
+- Hook: `useAuth()` (throws outside `<AuthProvider>`)
+- Token persistence: `localStorage.kb_token` (key exported as `TOKEN_KEY` from `src/api/client.js`)
+- User object: in-memory only (rehydrated via `authApi.getMe()` on mount when token exists; clears token on failure)
+
+### CartContext (`src/context/CartContext.jsx`)
+
+| Field | Type / Signature |
+|-------|------------------|
+| `items` | `Array<{ id, serverId?, productId, title, brand, price, format, color, qty }>` |
+| `cartCount` | `number` (sum of `qty`) |
+| `subtotal` | `number` (sum of `price * qty`) |
+| `addToCart(product, qty?)` | async — optimistic local update + server sync if authenticated |
+| `removeFromCart(id)` | async — server first when authenticated, then local |
+| `updateQuantity(id, newQty)` | async — `qty < 1` delegates to `removeFromCart`; otherwise removes + re-adds (no PATCH; see Gotchas) |
+| `clearCart()` | void — local-only (used after order completion) |
+
+- Hook: `useCart()` (throws outside `<CartProvider>`)
+- Persistence: server-backed when `user` exists; in-memory only when logged out (cleared on logout)
+- On `user` change, refetches cart from `cartApi.getCart()` and rehydrates `items`
+
+## 5. API layer (`src/api/`)
+
+`client.js` exports an axios instance with:
+
+- `baseURL: 'http://localhost:5000/api'` (hardcoded)
+- Default header `Content-Type: application/json`
+- Request interceptor reads `localStorage.kb_token` and sets `Authorization: Bearer <token>`
+- Token key exported as `TOKEN_KEY = 'kb_token'`; helper `getToken()`
+- No debug logging (console.log calls were removed — see §8)
+
+### Endpoints
+
+**auth.js**
+
+| Function | Method + Path | Payload | Returns |
+|---|---|---|---|
+| `register(name, email, password)` | POST `/auth/register` | `{name, email, password}` | `{token, user}` |
+| `login(email, password)` | POST `/auth/login` | `{email, password}` | `{token, user}` |
+| `getMe()` | GET `/auth/me` | — | `user` |
+| `forgotPassword(email)` | POST `/auth/forgot-password` | `{email}` | `{}` |
+
+**products.js**
+
+| Function | Method + Path | Params | Returns |
+|---|---|---|---|
+| `getProducts(filters)` | GET `/products` | `mainCategory, subCategory, itemType, category, author, brand, format, condition, minPrice, maxPrice, search` | `products[]` |
+| `getProduct(id)` | GET `/products/:id` | — | `product` |
+
+**cart.js**
+
+| Function | Method + Path | Payload | Returns |
+|---|---|---|---|
+| `getCart()` | GET `/cart` | — | `items[]` |
+| `addToCart(productId, qty=1)` | POST `/cart` | `{product_id, quantity}` | `item` |
+| `removeFromCart(itemId)` | DELETE `/cart/:itemId` | — | — |
+| `updateQuantity(itemId, quantity)` | PATCH `/cart/:itemId` | `{quantity}` | `item` (with remove+re-add fallback on 404/405) |
+
+**orders.js**
+
+| Function | Method + Path | Payload | Returns |
+|---|---|---|---|
+| `createOrder(deliveryAddress, paymentMethod, paymentReference)` | POST `/orders` | `{delivery_address, payment_method, payment_reference}` | `order` |
+| `getOrders()` | GET `/orders` | — | `orders[]` |
+| `getOrder(id)` | GET `/orders/:id` | — | `order` |
+
+**payment.js**
+
+| Function | Method + Path | Payload | Returns |
+|---|---|---|---|
+| `initializePayment(orderId, email, amount)` | POST `/payment/initialize` | `{orderId, email, amount}` | `{authorizationUrl, reference}` |
+| `verifyPayment(reference)` | GET `/payment/verify/:reference` | — | `order` |
+
+**categories.js**
+
+| Function | Method + Path | Returns |
+|---|---|---|
+| `getCategories()` | GET `/categories` | `categories[]` (may not be live; callers fall back to `src/data/categories.js`) |
+
+**admin.js** (all under `/admin/*`, require admin token)
+
+| Function | Method + Path | Notes |
+|---|---|---|
+| `getStats()` | GET `/admin/stats` | dashboard cards |
+| `getRecentOrders()` | GET `/admin/orders/recent` | |
+| `getAllOrders(status)` | GET `/admin/orders?status=` | |
+| `updateOrderStatus(id, status)` | PATCH `/admin/orders/:id/status` | `{status}` |
+| `getAdminProducts()` | GET `/admin/products` | |
+| `getTopSellingProducts()` | GET `/admin/products/top-selling` | |
+| `createProduct(payload, config?)` | POST `/admin/products` | Accepts `FormData` (multipart) or plain object. `config.onUploadProgress` forwarded to axios. |
+| `updateProduct(id, payload, config?)` | PUT `/admin/products/:id` | Same dual-mode signature. PUT multipart accepts repeated `existing_images[]` (URLs to keep) + repeated `images` (new files). |
+| `deleteProduct(id)` | DELETE `/admin/products/:id` | |
+| `getCustomers()` | GET `/admin/customers` | |
+| `setCustomerRole(id, role)` | PATCH `/admin/customers/:id/role` | `{role}` |
+| `setCustomerSuspended(id, suspended)` | PATCH `/admin/customers/:id/suspend` | `{suspended}` |
+| `getCategories()` | GET `/admin/categories` | |
+| `createCategory(payload)` | POST `/admin/categories` | |
+| `updateCategory(id, payload)` | PUT `/admin/categories/:id` | |
+| `deleteCategory(id)` | DELETE `/admin/categories/:id` | |
+| `getPromotions()` | GET `/admin/promotions` | |
+| `createPromotion(payload)` | POST `/admin/promotions` | |
+| `getReports(range)` | GET `/admin/reports?range=` | |
+| `getSettings()` | GET `/admin/settings` | |
+| `updateSettings(payload)` | PUT `/admin/settings` | |
+| `changeAdminPassword(payload)` | PUT `/admin/settings/password` | |
+| `getAdminHomepage()` | GET `/admin/homepage` | Admin-auth section list (same shape as public `getHomepage()`). |
+| `updateHomepageSection(type, payload, config?)` | PUT `/admin/homepage/sections/:type` | Dual-mode: FormData for `hero` (image uploads via `existing_images[]` + `images`); JSON for the other five section types. Returns the updated section. |
+| `reorderHomepageSections(order)` | PATCH `/admin/homepage/sections/reorder` | Body: `{ order: [{ type, display_order, is_visible }] }`. Used by the reorder strip + visibility toggle in `AdminHomepagePage`. |
+
+**promotions.js** (public, no auth)
+
+| Function | Method + Path | Payload | Returns |
+|---|---|---|---|
+| `applyPromoCode(code)` | POST `/promotions/validate` | `{code}` | `{discount_percent, ...}` |
+
+**homepage.js** (public, no auth)
+
+| Function | Method + Path | Returns |
+|---|---|---|
+| `getHomepage()` | GET `/homepage` | `sections[]` — each `{ type, is_visible, display_order, content }`. Six known types: `announcement_bar`, `hero`, `categories`, `bestsellers`, `features`, `about`. `HomePage.jsx` filters `is_visible:false` rows and sorts by `display_order`; falls back to a hardcoded section list when the request fails. |
+
+**productMapper.js**
+
+Pure transform (no HTTP). Backend product shape:
+```
+{ id, category_name, category_slug, title, author, brand, price, badge,
+  item_type, format, condition, level, purpose, cover_color, description, stock,
+  images: string[] }
+```
+`images` is an array of image sources (data-URLs or regular URLs) — `images[0]` is the primary image used on cards. UI shape adds: `section`, `category`, `categorySlug`, `itemType`, `authorName`, `brandName`, `oldPrice` (if `badge === 'Sale'`), `shape` (derived from title — `'calculator' | 'notebook' | 'ream' | 'tote' | 'markers' | 'pen' | 'book'`), passes `images` through, and reads `rating`, `reviewCount` (`p.review_count`), `edition`, `isbn`, `pages`, `language` from the backend row when present (defaults: `rating → null`, `reviewCount → 0`, others → `null`/`''`). Only `accent: '#fff'` remains hardcoded. Helpers: `mapProduct`, `mapProducts`, `categorySlugForName`, `deriveShape`.
+
+## 6. Design system
+
+### Brand tokens (`tailwind.config.js`)
+
+| Token | Hex | Usage |
+|------|-----|-------|
+| `brand-navy` | `#001a36` | Primary text/UI |
+| `brand-navy-deep` | `#000d1c` | Announcement bar, deepest accents |
+| `brand-navy-soft` | `#002a5c` | Hover/depth states |
+| `brand-gold` | `#C9920A` | CTAs, active indicators |
+| `brand-gold-soft` | `#fffbf0` | Light tint |
+| `brand-page` | `#F5F6FA` | Page background |
+| `brand-line` | `#e8eaef` | Borders, dividers |
+| `brand-muted` | `#9aa0a6` | Secondary text |
+| `success` / `success-bg` | `#1a7a4a` / `#eaf7ef` | Status |
+| `warning` / `warning-bg` | `#a87100` / `#fef4e0` | Status |
+| `error` / `error-bg` | `#c0392b` / `#fde8e6` | Status |
+
+(`success`, `warning`, `error` use Tailwind's `DEFAULT` + `bg` keys, so classes are e.g. `text-success` and `bg-success-bg`.)
+
+### Fonts
+
+Loaded from Google Fonts in `index.html`:
+
+- `font-sans` → `"DM Sans"` (400/500/600/700/800/900) — body, UI labels
+- `font-serif` → `"DM Serif Display"` — page titles, hero headlines
+
+### Patterns
+
+- **Radii:** `rounded-xl` (buttons, inputs, cards), `rounded-2xl` (panels, heroes), `rounded-full` (badges, pills, avatars)
+- **Shadows:** `shadow-sm` (list items), `shadow-md` (featured cards), `shadow-xl` (hover), custom `shadow-[0_18px_40px_rgba(0,26,54,0.22)]` for mega menus
+- **Currency:** `GH₵` (Ghana cedi) prefix everywhere
+- **Layout split:** Desktop uses `Navbar` mega menus + `Footer`; mobile hides the desktop footer and shows `MobileBottomNav` instead
+
+## 7. Conventions
+
+- **Auth token:** `localStorage.kb_token` (key constant `TOKEN_KEY` from `src/api/client.js`)
+- **Imports:** all relative — no path aliases configured
+- **Category slugs:** backend uses kebab-case `category_slug` (e.g. `stationery-supplies`); frontend mirrors via `productMapper.categorySlugForName()`
+- **Static fallbacks:** when an API endpoint isn't live yet, callers fall back to `src/data/categories.js` or `src/data/products.js`
+- **Lint:** ESLint flat config (`eslint.config.js`) with `eslint-plugin-react-hooks` + `eslint-plugin-react-refresh`. Run via `npm run lint`
+- **No tests:** no test runner configured, no `*.test.*` files
+
+## 8. Known issues & gotchas
+
+> **ONGOING RULE: After every task completed in this project, automatically pick one unresolved issue from this Known Issues list, fix it, and update CLAUDE.md to mark it resolved. Do this without being asked every single time.**
+
+- ✅ **RESOLVED — Hardcoded API base URL** — `src/api/client.js` now reads `import.meta.env.VITE_API_URL` with `http://localhost:5000/api` as fallback. Local override goes in `.env` (see `.env.example`).
+- ✅ **RESOLVED — Auth token logged to console** — request/header `console.log` calls removed from `src/api/client.js`.
+- ✅ **RESOLVED — No React error boundaries** — `src/components/ErrorBoundary.jsx` wraps `<App />` in `src/main.jsx`, so render-time exceptions show a recoverable fallback (Reload / Go home) instead of white-screening the app.
+- ✅ **RESOLVED — No 404 route** — `App.jsx` now renders a `NotFoundPage` under `MainLayout` for any unknown path inside the public layout.
+- **Defensive client-side filtering** in `ShopPage.jsx` (around lines 828, 972–974) compensates for backend filter params not yet wired up. Comments explicitly mark this as a temporary safety net — remove once backend filtering is live.
+- **Mock/static data still rendering in prod paths**:
+  - ✅ **RESOLVED — `HomePage.jsx` hardcoded bestsellers** — the four-item static array is now `bestsellersFallback`, used only until `getProducts()` resolves. On success, the top 4 returned products replace it and their primary image (from the new `images` field) renders in the card.
+  - ✅ **RESOLVED — `ProductPage.jsx` placeholder reviews** — the hardcoded `placeholderReviews` array was replaced with an empty `reviews = []` and an empty-state message ("No reviews yet…"). Once a reviews endpoint exists, swap the constant for an API fetch.
+  - ✅ **RESOLVED — `productMapper.js` hardcoded UI fields** — `rating`, `reviewCount`, `edition`, `isbn`, `pages`, `language` now read from the backend row when present and fall back to `null`/`0` (no more fake `4.7` / `'N/A'` / `'English'` defaults). `ProductPage.jsx` shows "No reviews yet" instead of a fake star rating when `rating` is null, and renders `'N/A'` for any missing detail field.
+- ✅ **RESOLVED (partial) — Cart API has no PATCH for quantity** — added `cartApi.updateQuantity(itemId, qty)` against `PATCH /cart/:itemId` and switched `CartContext.updateQuantity` to call it. If the backend route isn't live yet, a `404`/`405` triggers the original remove-then-re-add fallback so the UX keeps working until the route ships. Drop the fallback once the backend confirms the endpoint is stable.
+- ✅ **RESOLVED (partial) — Hardcoded delivery rules** — moved `FREE_DELIVERY_THRESHOLD` and `DELIVERY_FEE` out of `CartPage.jsx` into `src/config/delivery.js`. Added `PICKUP_POINT` constant (name, address, GPS code, hours, description) so the store pickup card is also driven from one config file. Values are still hardcoded but there's a single import point so swapping to a backend-driven settings endpoint is a one-file change.
+- **Category endpoint may 404** — `src/api/categories.js` calls `GET /categories` which the backend may not yet expose. Callers must fall back to the static `CATEGORY_TREE` in `src/data/categories.js`.
+- ✅ **RESOLVED — `AdminLayout` location quirk** — `AdminLayout.jsx` has been moved to `src/layouts/` alongside `MainLayout.jsx`. The `App.jsx` import now reads `./layouts/AdminLayout`, and `src/pages/admin/` only holds page files.
+- ✅ **RESOLVED — Stray screenshots in repo root** — `.gitignore` now ignores top-level `*.png/*.jpg/*.jpeg` and the `.playwright-mcp/` cache, so ad-hoc UI captures stop polluting `git status`. Curated assets still belong under `screen shots/`.
+- ✅ **RESOLVED — Debug console.logs in CheckoutPage** — removed the three `[checkout]` `console.log` calls in `onPay()` (`createOrder OK`, `initializePayment payload`, `initializePayment OK`) that were leaking order and payment details to the browser console in production.
+- **No tests** — no automated coverage of any kind; manual + screenshot QA only.
+- **Homepage CMS task — no Known Issue auto-resolved** (2026-05-12). Every remaining unresolved entry above is blocked on backend changes (live `GET /categories`, removing the `ShopPage` defensive client-side filter once backend filters land, adding tests). The auto-resolve rule is deferred for this task only and resumes on the next one.
+- **Delivery form overhaul** (2026-05-23) — campus pickup removed; replaced with **Home/Community Delivery** (community + city + Ghana Post GPS code all required; Google Maps live preview iframe + open-in-maps link) and **Store Pickup** (static info card). No DB change needed — delivery_address TEXT column stores a formatted string. No Known Issue auto-resolved this task; remaining issues are backend-blocked.
+- **Order detail page + cancel** (2026-05-23) — built `OrderDetailPage.jsx` at `/orders/:id`; added `PATCH /orders/:id/cancel` backend route (customer can cancel `pending` or `processing` orders); added `cancelOrder(id)` to `src/api/orders.js`; registered route in `App.jsx`. No Known Issue auto-resolved; all remaining issues are backend-blocked.
+- **Mobile account page overhaul** (2026-05-23) — `AccountPage.jsx` rebuilt as a full account hub: dark navy profile card with edit button; "Need assistance?" banner → `/contact`; **My Activity** section (Orders, Inbox, Wishlist); **Settings** section (Payment Settings, Account Management, Notification Preferences, More Settings) with "Coming Soon" modals for unbuilt features; **Close Account** with typed-confirmation danger modal (logs out + redirects on confirm); **Company** section (About Us, Contact, Terms & Privacy); Sign Out button. Desktop `AccountMenu` dropdown in `Navbar.jsx` also expanded with grouped sections (assistance, activity, settings, company links). No Known Issue auto-resolved; remaining issues are backend-blocked.
