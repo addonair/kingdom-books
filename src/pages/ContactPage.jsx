@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useBrand } from '../context/BrandContext.jsx'
 
 const subjects = [
   'General enquiry',
@@ -46,6 +47,7 @@ const WhatsAppIcon = (
 )
 
 function ContactPage() {
+  const brand = useBrand()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState(subjects[0])
@@ -91,7 +93,7 @@ function ContactPage() {
             </h1>
             <p className="text-white/75 text-sm md:text-base max-w-xl">
               Questions about a course book, a bulk order, or your delivery? Send us a message and a
-              member of our Legon team will get back to you within one working day.
+              member of our team will get back to you within one working day.
             </p>
           </div>
         </div>
@@ -220,13 +222,9 @@ function ContactPage() {
               <div className="flex gap-3 mb-5">
                 <div className="text-brand-gold shrink-0 mt-0.5">{PinIcon}</div>
                 <div className="text-[13.5px] leading-relaxed">
-                  <div className="font-semibold mb-0.5">Kingdom Books & Stationery</div>
+                  <div className="font-semibold mb-0.5">{brand.contactStoreName}</div>
                   <div className="text-white/75">
-                    Balme Library Complex
-                    <br />
-                    University of Ghana, Legon
-                    <br />
-                    Accra, Ghana
+                    {brand.pickupAddress}
                   </div>
                 </div>
               </div>

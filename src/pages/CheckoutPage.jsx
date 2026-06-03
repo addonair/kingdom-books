@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { createOrder } from '../api/orders.js'
 import { initializePayment } from '../api/payment.js'
 import { applyPromoCode } from '../api/promotions.js'
-import { FREE_DELIVERY_THRESHOLD, DELIVERY_FEE, PICKUP_POINT } from '../config/delivery.js'
+import { useBrand } from '../context/BrandContext.jsx'
 
 const providers = [
   {
@@ -151,6 +151,7 @@ function IconExternalLink() {
 function CheckoutPage() {
   const { items, subtotal } = useCart()
   const { user, loading: authLoading } = useAuth()
+  const brand = useBrand()
   const location = useLocation()
 
   const [step, setStep] = useState(1)
@@ -183,9 +184,9 @@ function CheckoutPage() {
   const deliveryFee =
     delivery.deliveryType === 'pickup'
       ? 0
-      : subtotal >= FREE_DELIVERY_THRESHOLD
+      : subtotal >= brand.freeDeliveryThreshold
         ? 0
-        : DELIVERY_FEE
+        : brand.deliveryFee
 
   const discountAmount = promoApplied
     ? Math.round(subtotal * (promoApplied.discount_percent / 100) * 100) / 100
@@ -264,39 +265,67 @@ function CheckoutPage() {
     if (!canPay || paying) return
     setPayError('')
     setPaying(true)
-    try {
-      const deliveryAddress =
-        delivery.deliveryType === 'pickup'
-          ? `Pickup — ${PICKUP_POINT.name}, ${PICKUP_POINT.address} (GPS: ${PICKUP_POINT.gpsCode})`
-          : [
-              delivery.houseNo.trim() && `No. ${delivery.houseNo.trim()}`,
-              delivery.street.trim(),
-              delivery.community.trim(),
-              delivery.city.trim(),
-              `GPS: ${delivery.gpsCode.trim().toUpperCase()}`,
-            ]
-              .filter(Boolean)
-              .join(', ')
 
-      const order = await createOrder(deliveryAddress, 'paystack', null, promoApplied?.code ?? null)
-      const email = user?.email || delivery.email
-      if (order?.id == null || !email || !Number.isFinite(total) || total <= 0) {
-        throw new Error(
-          `Cannot initialize payment — missing field(s): ${[
-            order?.id == null && 'orderId',
-            !email && 'email',
-            (!Number.isFinite(total) || total <= 0) && 'cartTotal',
+    const deliveryAddress =
+      delivery.deliveryType === 'pickup'
+        ? `Pickup — ${brand.contactStoreName || brand.storeName}, ${brand.pickupAddress} (GPS: ${brand.pickupGpsCode})`
+        : [
+            delivery.houseNo.trim() && `No. ${delivery.houseNo.trim()}`,
+            delivery.street.trim(),
+            delivery.community.trim(),
+            delivery.city.trim(),
+            `GPS: ${delivery.gpsCode.trim().toUpperCase()}`,
           ]
             .filter(Boolean)
-            .join(', ')}`,
-        )
-      }
+            .join(', ')
+
+    let order
+    try {
+      order = await createOrder(
+        deliveryAddress,
+        'paystack',
+        null,
+        promoApplied?.code ?? null,
+        {
+          customerName: delivery.fullName,
+          customerPhone: delivery.phone,
+          customerEmail: delivery.email || user?.email,
+          deliveryType: delivery.deliveryType,
+        }
+      )
+    } catch (err) {
+      setPayError(
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        'Could not place your order. Please try again.',
+      )
+      setPaying(false)
+      return
+    }
+
+    const email = user?.email || delivery.email
+    if (order?.id == null || !email || !Number.isFinite(total) || total <= 0) {
+      setPayError(
+        `Cannot start payment — missing: ${[
+          order?.id == null && 'order ID',
+          !email && 'email',
+          (!Number.isFinite(total) || total <= 0) && 'cart total',
+        ]
+          .filter(Boolean)
+          .join(', ')}`,
+      )
+      setPaying(false)
+      return
+    }
+
+    try {
       const { authorizationUrl } = await initializePayment(order.id, email, total)
       window.location.href = authorizationUrl
     } catch (err) {
       setPayError(
+        err?.response?.data?.error ||
         err?.response?.data?.message ||
-          'We could not start your payment. Please try again.',
+        'We could not start your payment. Please try again.',
       )
       setPaying(false)
     }
@@ -652,17 +681,17 @@ function CheckoutPage() {
                   )}
                 </div>
 
-                {deliveryFee === 0 && subtotal >= FREE_DELIVERY_THRESHOLD ? (
+                {deliveryFee === 0 && subtotal >= brand.freeDeliveryThreshold ? (
                   <div className="flex items-center gap-2 rounded-xl bg-success-bg border border-success/20 px-4 py-3 text-sm text-success font-semibold">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path d="M5 12l5 5 9-11" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    Free delivery — order is above GH₵{FREE_DELIVERY_THRESHOLD}
+                    Free delivery — order is above GH₵{brand.freeDeliveryThreshold}
                   </div>
                 ) : (
                   <p className="text-[12px] text-brand-navy/55">
-                    Delivery fee: <span className="font-semibold text-brand-navy">GH₵ {DELIVERY_FEE.toFixed(2)}</span>.{' '}
-                    Free on orders above GH₵{FREE_DELIVERY_THRESHOLD}.
+                    Delivery fee: <span className="font-semibold text-brand-navy">GH₵ {Number(brand.deliveryFee).toFixed(2)}</span>.{' '}
+                    Free on orders above GH₵{brand.freeDeliveryThreshold}.
                   </p>
                 )}
               </div>
@@ -676,7 +705,7 @@ function CheckoutPage() {
                     <IconStore />
                   </span>
                   <div>
-                    <div className="font-bold text-sm text-brand-navy">{PICKUP_POINT.name}</div>
+                    <div className="font-bold text-sm text-brand-navy">{brand.contactStoreName || brand.storeName}</div>
                     <div className="text-[11px] text-brand-gold font-semibold uppercase tracking-wide mt-0.5">
                       Pickup point
                     </div>
@@ -688,9 +717,9 @@ function CheckoutPage() {
                       <IconMapPin />
                     </span>
                     <div>
-                      <div className="font-semibold text-brand-navy">{PICKUP_POINT.address}</div>
+                      <div className="font-semibold text-brand-navy">{brand.pickupAddress}</div>
                       <div className="text-[12px] text-brand-navy/60 mt-0.5 font-mono">
-                        GPS: {PICKUP_POINT.gpsCode}
+                        GPS: {brand.pickupGpsCode}
                       </div>
                     </div>
                   </div>
@@ -698,13 +727,13 @@ function CheckoutPage() {
                     <span className="shrink-0 text-brand-gold">
                       <IconClock />
                     </span>
-                    {PICKUP_POINT.hours}
+                    {brand.pickupHours}
                   </div>
                   <p className="text-[12px] text-brand-navy/60 leading-relaxed pt-1 border-t border-brand-gold/20">
-                    {PICKUP_POINT.description}
+                    {brand.pickupDescription}
                   </p>
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(PICKUP_POINT.address)}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(brand.pickupAddress)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-[12px] font-bold text-brand-gold hover:underline"

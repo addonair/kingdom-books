@@ -5,6 +5,7 @@ import { useAdminAuth } from '../context/AdminAuthContext.jsx'
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', end: true, icon: IconHome },
   { to: '/admin/homepage', label: 'Homepage', icon: IconLayout },
+  { to: '/admin/delivery', label: 'Delivery', icon: IconTruck },
   { to: '/admin/products', label: 'Products', icon: IconBox },
   { to: '/admin/orders', label: 'Orders', icon: IconReceipt },
   { to: '/admin/customers', label: 'Customers', icon: IconUsers },
@@ -146,6 +147,16 @@ function IconLayout() {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8" />
       <path d="M3 9h18M9 21V9" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  )
+}
+function IconTruck() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="15" height="13" rx="1" />
+      <path d="M16 8h4l3 5v4h-7V8z" />
+      <circle cx="5.5" cy="18.5" r="2.5" />
+      <circle cx="18.5" cy="18.5" r="2.5" />
     </svg>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useBrand } from '../context/BrandContext.jsx'
 
 function RegisterPage() {
   const [fullName, setFullName] = useState('')
@@ -10,6 +11,7 @@ function RegisterPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const { register } = useAuth()
+  const brand = useBrand()
   const navigate = useNavigate()
 
   const passwordsMismatch = password.length > 0 && confirm.length > 0 && password !== confirm
@@ -50,7 +52,7 @@ function RegisterPage() {
               Create your account
             </h1>
             <p className="text-sm text-brand-navy/60 mt-2">
-              Join Kingdom Books for faster checkout and order tracking.
+              {brand.registerSubtitle}
             </p>
           </div>
 

@@ -136,7 +136,6 @@ function AdminProductsPage() {
     getAdminProducts(params)
       .then((rows) => {
         if (ignore) return
-        console.log('[AdminProductsPage] raw products from API →', rows)
         setProducts(Array.isArray(rows) ? rows : [])
       })
       .catch((err) => {

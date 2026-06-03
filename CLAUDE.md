@@ -4,7 +4,7 @@ Onboarding reference for working in this repo. Update it when the structure or c
 
 ## 1. Overview
 
-Kingdom Books & Stationery is an e-commerce front end for a University of Ghana bookstore. It serves a public storefront (browse, cart, checkout, payment callback, account/orders) and a role-gated admin dashboard (products, orders, customers, categories, promotions, reports, settings).
+Kingdom Books & Stationery is an e-commerce front end for a bookstore. It serves a public storefront (browse, cart, checkout, payment callback, account/orders) and a role-gated admin dashboard (products, orders, customers, categories, promotions, reports, settings).
 
 **Stack**
 
@@ -137,6 +137,7 @@ kingdom-books/
 | `AdminPromotionsPage.jsx` | List + create promotion codes |
 | `AdminReportsPage.jsx` | Recharts bar/pie analytics |
 | `AdminSettingsPage.jsx` | Store settings + admin password change |
+| `AdminDeliveryPage.jsx` | Delivery CMS: fees + pickup point editor with live checkout preview (split-pane, same pattern as Homepage) |
 
 **src/design-reference/** — design canvas + Figma exports + screen mockups. Non-functional; safe to ignore at build time.
 
@@ -165,7 +166,8 @@ kingdom-books/
 ├── /admin/categories              AdminCategoriesPage
 ├── /admin/promotions              AdminPromotionsPage
 ├── /admin/reports                 AdminReportsPage
-└── /admin/settings                AdminSettingsPage
+├── /admin/settings                AdminSettingsPage
+└── /admin/delivery                AdminDeliveryPage
 ```
 
 `RequireAdmin` (`src/components/RequireAdmin.jsx`) checks `useAuth().user?.role === 'admin'` and redirects to `/admin/login` otherwise.
@@ -383,3 +385,52 @@ Loaded from Google Fonts in `index.html`:
 - **Delivery form overhaul** (2026-05-23) — campus pickup removed; replaced with **Home/Community Delivery** (community + city + Ghana Post GPS code all required; Google Maps live preview iframe + open-in-maps link) and **Store Pickup** (static info card). No DB change needed — delivery_address TEXT column stores a formatted string. No Known Issue auto-resolved this task; remaining issues are backend-blocked.
 - **Order detail page + cancel** (2026-05-23) — built `OrderDetailPage.jsx` at `/orders/:id`; added `PATCH /orders/:id/cancel` backend route (customer can cancel `pending` or `processing` orders); added `cancelOrder(id)` to `src/api/orders.js`; registered route in `App.jsx`. No Known Issue auto-resolved; all remaining issues are backend-blocked.
 - **Mobile account page overhaul** (2026-05-23) — `AccountPage.jsx` rebuilt as a full account hub: dark navy profile card with edit button; "Need assistance?" banner → `/contact`; **My Activity** section (Orders, Inbox, Wishlist); **Settings** section (Payment Settings, Account Management, Notification Preferences, More Settings) with "Coming Soon" modals for unbuilt features; **Close Account** with typed-confirmation danger modal (logs out + redirects on confirm); **Company** section (About Us, Contact, Terms & Privacy); Sign Out button. Desktop `AccountMenu` dropdown in `Navbar.jsx` also expanded with grouped sections (assistance, activity, settings, company links). No Known Issue auto-resolved; remaining issues are backend-blocked.
+- **Full store rebranding + centralized brand config** (2026-05-23, extended 2026-05-23) — all hardcoded "University of Ghana" / "UG" / "Legon" / "campus" references removed from every file (HomePage fallbacks, HeroSection fallback, FeaturedTrio, ContactPage, ProductPage, CheckoutPage, email.js password reset). Created `src/config/brand.js` (all brand text defaults in one place) and `src/context/BrandContext.jsx`. Admin Store Branding section expanded to **13 admin-editable fields** (logo, navbar, footer, contact card, auth pages, orders/account, emails). Logo removal fixed (payload now always sends all keys including empty string = "use default"). `CheckoutPage` pickup card name now reads `brand.contactStoreName`. `email.js` `sendPasswordResetEmail` uses storeName variable. No Known Issue auto-resolved; remaining issues are backend-blocked.
+- **Admin Delivery page with live preview** (2026-05-23) — created `AdminDeliveryPage.jsx` at `/admin/delivery` with split-pane editor (form left, live checkout-step-1 preview right, toggling between Home delivery and Store pickup tabs). All delivery settings now admin-editable: **delivery fees** (`free_delivery_threshold`, `standard_delivery_fee` — also in Settings → Delivery Settings, linked with "Also in Settings" shortcut) and **pickup point** (`pickup_address`, `pickup_gps_code`, `pickup_hours`, `pickup_description`, `pickup_phone` — 5 new keys added to `ALLOWED_SETTING_KEYS` in API). `BrandContext` now maps all 7 delivery keys and parses numeric fee fields from settings text. `CheckoutPage`, `CartPage`, `ContactPage` updated to read from `brand.*` instead of static `delivery.js` constants. No Known Issue auto-resolved; remaining issues are backend-blocked.
+- **Admin order detail view + delete completed orders** (2026-05-23) — (1) **Backend** (`routes/admin.js`): added `GET /admin/orders/:id` returning full order row + `items[]` (with `title`, `author`, `brand`, `cover_color`); added `DELETE /admin/orders/:id` restricted to terminal statuses (`delivered`, `picked_up`, `cancelled`) — returns `400` if order is still active. (2) **`src/api/admin.js`**: added `getAdminOrder(id)` and `deleteAdminOrder(id)`. (3) **`AdminOrdersPage.jsx`**: added `OrderDetailModal` (fetches live data, shows delivery address highlighted in a coloured card for quick dispatch reference, customer contact with clickable tel/email links, items list, payment summary); added `DeleteOrderModal` (confirmation dialog, removes order from local state on success); added `View` button on every row and `Delete` button (red, terminal orders only) replacing the previous `—` placeholder. No Known Issue auto-resolved; remaining issues are backend-blocked.
+- **Order flow differentiation + UI clarity** (2026-05-23) — end-to-end cleanup of the two-pipeline order system: (1) **`AdminOrdersPage.jsx`**: added per-order `MiniPipeline` component (colour-coded dots + step count showing exact position in the home or pickup pipeline); added `🚚 Home Delivery / 🏪 Store Pickup` filter pills above the orders table; added a pipeline legend below the table explaining both flows. (2) **`AdminEmailTemplatesPage.jsx`**: templates grouped into four labelled sections (All Order Types / Home Delivery Only / Pickup Only / System & Admin) with per-template `TypeTag` badge; auto-switches preview context when you click a template; added a "Preview as: Home Delivery | Store Pickup" toggle that swaps sample variables in the live iframe preview. (3) **`OrdersPage.jsx`**: added `DeliveryTypeBadge` and `MiniProgress` to each order card so customers can see delivery type + step progress without clicking in. (4) **`OrderDetailPage.jsx`**: replaced ad-hoc pickup detection with a shared `detectIsPickup()` helper that checks `delivery_type` field first then falls back to address string; timeline "What's happening" hint now shows a "Next: <step label>" line so the customer always knows what comes next. No Known Issue auto-resolved; all remaining issues are backend-blocked.
+- **Checkout 400 error + error-handler fixes** (2026-05-23) — fixed three bugs: (1) `CheckoutPage.jsx` `onPay()` catch block checked `data.message` but every backend error uses `data.error`, so real error reasons (e.g. "Cart is empty", "Insufficient stock") were always hidden behind the generic "We could not start your payment" string; split into two separate try/catch blocks — one for `createOrder` (shows "Could not place your order") and one for `initializePayment` (shows "We could not start your payment"), both now surfacing `data.error || data.message`. (2) `OrdersPage.jsx` had the same `data.message`-only bug on its GET /orders error handler — fixed to `data.error || data.message`. (3) `kingdom-books-api/src/config/schema.sql` `orders` CREATE TABLE was missing `delivery_type`, `customer_name`, `customer_phone`, `customer_email` and had the old narrow status CHECK constraint — synced with the live migration so fresh `npm run db:setup` installs get a complete schema. No Known Issue auto-resolved; remaining issues are backend-blocked.
+- **Order tracking overhaul + granular status pipeline** (2026-05-23) — full end-to-end redesign of the order lifecycle: (1) **DB**: 4 new columns on `orders` (`customer_name`, `customer_phone`, `customer_email`, `delivery_type`); status CHECK constraint widened to 9 values (`migrateOrderStatusCheck.js` also updated to the wide set so it no longer narrows the constraint when re-run); 5 new email templates seeded (`order_confirmed`, `order_packaged`, `order_out_for_delivery`, `order_ready_for_pickup`, `order_picked_up`). Migration: `migrateOrderEnhancements.js` chained into `npm run migrate`. (2) **Backend** (`routes/admin.js`): static `VALID_TRANSITIONS` replaced with `getValidTransitions(fromStatus, deliveryType)` — home delivery path: `pending → confirmed → packaged → out_for_delivery → delivered`; pickup path: `pending → confirmed → ready_for_pickup → picked_up`; `ORDERS_SELECT` extended with `delivery_type`, `customer_phone`, `COALESCE(o.customer_name, u.name)`, `COALESCE(o.customer_email, u.email)`. Email fired directly from updated order row. `routes/settings.js` public endpoint created for BrandContext; `admin_login_subtitle` added to PUBLIC_KEYS. (3) **Frontend** (`src/api/orders.js`): `createOrder` now accepts optional `{ customerName, customerPhone, customerEmail, deliveryType }` and sends them in the POST body. `CheckoutPage` passes all delivery form fields. (4) **`OrderDetailPage.jsx`**: fully rewritten — `HOME_STEPS` (5-step), `PICKUP_STEPS` (4-step), `LEGACY_STEPS` (3-step for old `processing` orders); `ContactInfo` component shows stored customer name/phone/email; delivery-type auto-detected; cancel now also works from `confirmed`. (5) **`AdminOrdersPage.jsx`**: fetches all orders, filters client-side; 6 tabs (All, Pending, Confirmed, In Progress, Completed, Cancelled) each with live count badge; `getNextStatus(status, deliveryType)` drives the advance button; delivery type pill shown on each row; customer phone visible; correct button labels per transition. (6) **`OrdersPage.jsx`** (storefront): updated `STATUS_LABELS` and `statusStyles` to cover all 9 statuses — `confirmed`, `packaged`, `out_for_delivery`, `ready_for_pickup`, `picked_up` all render with correct colour pills and human-readable labels. (7) **`AdminEmailTemplatesPage.jsx`**: `TEMPLATE_LABELS`, `TEMPLATE_DESCRIPTIONS`, and template list sort order updated to include all 5 new stage templates; `{{pickup_location}}`, `{{pickup_hours}}`, and `{{delivery_label}}` added to variables reference. **IMPORTANT — action needed**: restart the API server and run `npm run migrate` in `kingdom-books-api` to apply DB columns + seed templates. No Known Issue auto-resolved; remaining issues are backend-blocked.
+
+## 9. New-page branding rule
+
+> **MANDATORY: Every new page and component that displays store-specific text MUST follow this checklist.**
+
+When you create a new page or component:
+
+### Step 1 — No hardcoded store strings
+Never write literal store names, addresses, taglines, or marketing copy directly in JSX or JS. Always use one of:
+- `useBrand()` hook for any brand string that appears in the UI
+- `PICKUP_POINT` from `src/config/delivery.js` for physical address / GPS / hours
+- `process.env.STORE_NAME` (backend) for any store-name reference in server code
+
+### Step 2 — Map new text to an admin field
+If the text is something the store owner might want to change (a heading, a message, a tagline variant), it must have a corresponding entry in `AdminSettingsPage.jsx` → Store Branding. Add the key to:
+1. `BRANDING_KEYS` array in `AdminSettingsPage.jsx`
+2. `brandingForm` initial state in `AdminSettingsPage.jsx`
+3. The `useEffect` settings loader in `AdminSettingsPage.jsx`
+4. A clearly-labelled input field inside the Store Branding `<form>` JSX
+5. `ALLOWED_SETTING_KEYS` in `kingdom-books-api/src/routes/admin.js`
+6. `SETTINGS_MAP` in `src/context/BrandContext.jsx` (maps DB key → brand.js key)
+7. A default value in `src/config/brand.js`
+
+### Step 3 — Backend: use `getEmailBranding()` for emails
+Any new email-sending function in `email.js` must call `await emailShell(content)` (which reads branding from DB automatically). Never call `transporter.sendMail` with a hardcoded `from:` name — always use `process.env.STORE_NAME || 'Kingdom Books & Stationery'`.
+
+### Quick reference — where each text type lives
+| Text | Source | Admin location |
+|---|---|---|
+| Store name (full) | `brand.storeName` / `store_name` DB key | Settings → Store Info |
+| Store name (short) | `brand.storeNameShort` / `store_name_short` | Settings → Store Branding |
+| Tagline (short) | `brand.taglineShort` / `store_tagline_short` | Settings → Store Branding |
+| Footer copyright | `brand.footerCopyright` / `footer_copyright` | Settings → Store Branding |
+| Contact/pickup card | `brand.contactStoreName` / `contact_store_name` | Settings → Store Branding |
+| Login heading | `brand.loginHeading` / `login_heading` | Settings → Store Branding |
+| Register subtitle | `brand.registerSubtitle` / `register_subtitle` | Settings → Store Branding |
+| Order delivered msg | `brand.orderDeliveredThanks` / `order_delivered_thanks` | Settings → Store Branding |
+| Account footer | `brand.accountFooterLine` / `account_footer_line` | Settings → Store Branding |
+| Email header sub | `brand.emailHeaderSubtitle` / `email_header_subtitle` | Settings → Store Branding |
+| Email footer | `brand.emailFooterLine` / `email_footer_line` | Settings → Store Branding |
+| Email subjects/body | `email_templates` DB table | Admin → Email Templates |
+| Store address | `PICKUP_POINT.address` / `store_address` DB key | Settings → Store Info |
+| About page copy | `brand.aboutStory` etc. | Settings → Store Branding (or `brand.js`) |

@@ -28,9 +28,19 @@ export async function getAllOrders(status) {
   return data.orders
 }
 
+export async function getAdminOrder(id) {
+  const { data } = await client.get(`/admin/orders/${id}`)
+  return data.order
+}
+
 export async function updateOrderStatus(id, status) {
   const { data } = await client.patch(`/admin/orders/${id}/status`, { status })
   return data.order
+}
+
+export async function deleteAdminOrder(id) {
+  const { data } = await client.delete(`/admin/orders/${id}`)
+  return data
 }
 
 export async function getAdminProducts(params) {
@@ -95,6 +105,11 @@ export async function setCustomerRole(id, role) {
 export async function setCustomerSuspended(id, suspended) {
   const { data } = await client.patch(`/admin/customers/${id}/suspend`, { suspended })
   return data.user
+}
+
+export async function deleteCustomer(id) {
+  const { data } = await client.delete(`/admin/customers/${id}`)
+  return data
 }
 
 // The categories endpoint returns a nested tree: top-level rows each carry

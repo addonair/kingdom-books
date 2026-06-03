@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useBrand } from '../context/BrandContext.jsx'
 import Modal from '../components/Modal.jsx'
 
 function getInitials(name) {
@@ -156,6 +157,7 @@ function CloseAccountModal({ open, onClose, onConfirm }) {
 
 function AccountPage() {
   const { user, loading, logout } = useAuth()
+  const brand = useBrand()
   const navigate = useNavigate()
   const [closeAccountOpen, setCloseAccountOpen] = useState(false)
   const [comingSoon, setComingSoon] = useState(null)
@@ -385,7 +387,7 @@ function AccountPage() {
         </div>
 
         <p className="text-center text-[11px] text-brand-muted pb-4">
-          Kingdom Books & Stationery · University of Ghana
+          {brand.accountFooterLine}
         </p>
       </div>
 

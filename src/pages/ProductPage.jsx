@@ -603,9 +603,8 @@ function ProductPage() {
               <div className="prose max-w-none text-[14px] sm:text-[15px] text-brand-navy/80 leading-relaxed space-y-4">
                 <p>{product.description}</p>
                 <p>
-                  Suitable for undergraduate students at the University of Ghana and equivalent
-                  institutions, as well as professional candidates preparing for foundation-level
-                  papers in their respective fields.
+                  Suitable for students at tertiary institutions as well as professional candidates
+                  preparing for foundation-level papers in their respective fields.
                 </p>
               </div>
             )}

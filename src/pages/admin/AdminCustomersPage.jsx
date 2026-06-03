@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   getCustomers,
-  setCustomerRole,
   setCustomerSuspended,
+  deleteCustomer,
 } from '../../api/admin.js'
+import Modal from '../../components/Modal.jsx'
 import { useAdminAuth } from '../../context/AdminAuthContext.jsx'
 
 const inputClass =
@@ -32,21 +33,6 @@ function formatDate(value) {
   })
 }
 
-function RoleBadge({ role }) {
-  if (role === 'admin') {
-    return (
-      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border bg-brand-navy/10 text-brand-navy border-brand-navy/20">
-        Admin
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border bg-brand-page text-brand-navy/70 border-brand-line">
-      Customer
-    </span>
-  )
-}
-
 function AdminCustomersPage() {
   const { user: currentAdmin } = useAdminAuth()
   const [customers, setCustomers] = useState([])
@@ -55,6 +41,10 @@ function AdminCustomersPage() {
   const [search, setSearch] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState('')
+
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   function load() {
     setLoading(true)
@@ -77,19 +67,6 @@ function AdminCustomersPage() {
     )
   }, [customers, search])
 
-  async function handleRole(c, role) {
-    setActionError('')
-    setBusyId(c.id)
-    try {
-      await setCustomerRole(c.id, role)
-      load()
-    } catch (err) {
-      setActionError(err?.response?.data?.error || 'Failed to update role.')
-    } finally {
-      setBusyId(null)
-    }
-  }
-
   async function handleSuspend(c) {
     setActionError('')
     setBusyId(c.id)
@@ -100,6 +77,32 @@ function AdminCustomersPage() {
       setActionError(err?.response?.data?.error || 'Failed to update status.')
     } finally {
       setBusyId(null)
+    }
+  }
+
+  function openDelete(c) {
+    setDeleteTarget(c)
+    setDeleteError('')
+  }
+
+  function closeDelete() {
+    if (deleting) return
+    setDeleteTarget(null)
+    setDeleteError('')
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget || deleting) return
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      await deleteCustomer(deleteTarget.id)
+      setDeleteTarget(null)
+      load()
+    } catch (err) {
+      setDeleteError(err?.response?.data?.error || 'Failed to delete account.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -147,7 +150,6 @@ function AdminCustomersPage() {
                 <tr className="text-left text-[11px] uppercase tracking-wider text-brand-navy/55 border-b border-brand-line bg-brand-page/60">
                   <th className="px-5 py-3 font-bold">Customer</th>
                   <th className="px-5 py-3 font-bold">Email</th>
-                  <th className="px-5 py-3 font-bold">Role</th>
                   <th className="px-5 py-3 font-bold">Orders</th>
                   <th className="px-5 py-3 font-bold">Total spent</th>
                   <th className="px-5 py-3 font-bold">Joined</th>
@@ -157,7 +159,7 @@ function AdminCustomersPage() {
               <tbody>
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="px-5 py-10 text-center text-sm text-brand-navy/60">
+                    <td colSpan="6" className="px-5 py-10 text-center text-sm text-brand-navy/60">
                       No customers found.
                     </td>
                   </tr>
@@ -192,9 +194,6 @@ function AdminCustomersPage() {
                       <td className="px-5 py-3 text-brand-navy/75 truncate max-w-[220px]">
                         {c.email}
                       </td>
-                      <td className="px-5 py-3">
-                        <RoleBadge role={c.role} />
-                      </td>
                       <td className="px-5 py-3 text-brand-navy/80">{c.total_orders}</td>
                       <td className="px-5 py-3 font-bold text-brand-gold">
                         {ghs.format(Number(c.total_spent || 0))}
@@ -204,34 +203,23 @@ function AdminCustomersPage() {
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2 flex-wrap">
-                          {c.role === 'customer' ? (
-                            <button
-                              type="button"
-                              onClick={() => handleRole(c, 'admin')}
-                              disabled={busy}
-                              className="text-[12px] font-bold border border-brand-line hover:border-brand-gold hover:text-brand-gold disabled:opacity-50 transition-colors px-3 h-8 rounded-lg whitespace-nowrap"
-                            >
-                              {busy ? 'Working…' : 'Make Admin'}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleRole(c, 'customer')}
-                              disabled={busy || isSelf}
-                              title={isSelf ? "You can't demote yourself" : ''}
-                              className="text-[12px] font-bold border border-brand-line hover:border-brand-navy hover:text-brand-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors px-3 h-8 rounded-lg whitespace-nowrap"
-                            >
-                              Demote
-                            </button>
-                          )}
                           <button
                             type="button"
                             onClick={() => handleSuspend(c)}
                             disabled={busy || (isSelf && !c.suspended)}
                             title={isSelf && !c.suspended ? "You can't suspend yourself" : ''}
+                            className="text-[12px] font-bold border border-brand-line hover:border-warning hover:text-warning disabled:opacity-40 disabled:cursor-not-allowed transition-colors px-3 h-8 rounded-lg whitespace-nowrap"
+                          >
+                            {busy ? 'Working…' : c.suspended ? 'Unsuspend' : 'Suspend'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openDelete(c)}
+                            disabled={busy || isSelf}
+                            title={isSelf ? "You can't delete your own account" : ''}
                             className="text-[12px] font-bold border border-brand-line hover:border-error hover:text-error disabled:opacity-40 disabled:cursor-not-allowed transition-colors px-3 h-8 rounded-lg whitespace-nowrap"
                           >
-                            {c.suspended ? 'Unsuspend' : 'Suspend'}
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -243,6 +231,71 @@ function AdminCustomersPage() {
           </div>
         </div>
       )}
+
+      {/* Delete confirmation modal */}
+      <Modal
+        open={!!deleteTarget}
+        onClose={closeDelete}
+        title="Delete customer account"
+        size="md"
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={closeDelete}
+              disabled={deleting}
+              className="text-sm font-bold text-brand-navy/70 hover:text-brand-navy px-4 h-10"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-error hover:bg-red-700 disabled:opacity-60 transition-colors text-white font-bold text-sm px-5 h-10 rounded-xl"
+            >
+              {deleting ? 'Deleting…' : 'Yes, delete account'}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {deleteError && (
+            <div className="bg-error-bg text-error border border-error/20 rounded-xl px-4 py-2.5 text-sm">
+              {deleteError}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 p-4 bg-brand-page rounded-xl">
+            <div className="w-10 h-10 rounded-full bg-brand-gold/15 text-brand-gold font-bold text-[13px] flex items-center justify-center shrink-0">
+              {initials(deleteTarget?.name)}
+            </div>
+            <div className="min-w-0">
+              <div className="font-semibold text-brand-navy">{deleteTarget?.name}</div>
+              <div className="text-[12px] text-brand-navy/60 truncate">{deleteTarget?.email}</div>
+            </div>
+          </div>
+
+          <p className="text-sm text-brand-navy/80">
+            This will <span className="font-semibold text-brand-navy">permanently delete</span> this
+            customer's account and all associated data.
+          </p>
+
+          <div className="flex items-start gap-2.5 bg-brand-gold-soft border border-brand-gold/30 rounded-xl px-4 py-3 text-sm text-brand-navy/80">
+            <svg className="w-4 h-4 text-brand-gold mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            A goodbye email will be sent to{' '}
+            <span className="font-semibold">{deleteTarget?.email}</span> before the account is
+            removed. You can edit this email under{' '}
+            <span className="font-semibold">Email Templates → Account Goodbye</span>.
+          </div>
+
+          <p className="text-[12px] text-brand-navy/50">This action cannot be undone.</p>
+        </div>
+      </Modal>
     </div>
   )
 }

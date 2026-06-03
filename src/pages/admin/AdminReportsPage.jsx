@@ -135,8 +135,8 @@ function AdminReportsPage() {
                 No revenue in this period yet.
               </div>
             ) : (
-              <div style={{ width: '100%', height: 280 }}>
-                <ResponsiveContainer>
+              <div style={{ width: '100%', height: 280, minWidth: 0 }}>
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e8eaef" vertical={false} />
                     <XAxis
@@ -170,8 +170,8 @@ function AdminReportsPage() {
                 No category data yet.
               </div>
             ) : (
-              <div style={{ width: '100%', height: 280 }}>
-                <ResponsiveContainer>
+              <div style={{ width: '100%', height: 280, minWidth: 0 }}>
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={categoryData}

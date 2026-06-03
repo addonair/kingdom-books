@@ -44,7 +44,7 @@ function HeroSection({ content, interactive = true }) {
 
   const title = content?.title || 'Books, stationery & gifts for the academic year'
   const subtitle =
-    content?.subtitle || 'Search 12,000+ titles. Free delivery on the Legon campus. Pay with Mobile Money.'
+    content?.subtitle || 'Search 12,000+ titles. Free delivery nationwide. Pay with Mobile Money.'
   const bgColor = content?.bg_color || '#001a36'
   const textColor = content?.text_color || '#ffffff'
   const buttonText = content?.button_text || 'Search'
@@ -97,10 +97,10 @@ function HeroSection({ content, interactive = true }) {
       <div className="relative max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="max-w-2xl">
           <div className="text-brand-gold text-[11px] md:text-xs uppercase tracking-[0.2em] mb-3">
-            The Official UG Bookshop
+            The Number One Academic Bookshop in Ghana
           </div>
           <h1
-            className="font-serif leading-[1.1] text-2xl sm:text-4xl md:text-5xl lg:text-[56px] mb-3 md:mb-5"
+            className="font-serif leading-[1.1] text-2xl sm:text-4xl md:text-7xl lg:text-[56px] mb-3 md:mb-5"
             style={{ color: textColor }}
           >
             {title}
@@ -145,6 +145,13 @@ function HeroSection({ content, interactive = true }) {
               </Link>
             )}
           </form>
+
+          <Link
+            to="/shop-smart"
+            className="mt-3 inline-flex items-center gap-2 border border-brand-gold/40 bg-brand-navy/30 backdrop-blur-sm rounded-full px-4 py-2 text-xs text-brand-gold hover:bg-brand-navy/50 transition-colors font-medium"
+          >
+            ✨ Try Shop Smart — upload a photo of your list and we'll find everything
+          </Link>
 
           <div className="mt-6 md:mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {trustSignals.map((t) => (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '../../context/AdminAuthContext.jsx'
+import { useBrand } from '../../context/BrandContext.jsx'
 
 function AdminLoginPage() {
   const [email, setEmail] = useState('')
@@ -8,6 +9,7 @@ function AdminLoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const { login } = useAdminAuth()
+  const brand = useBrand()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -113,7 +115,7 @@ function AdminLoginPage() {
         </div>
 
         <p className="text-center text-[12px] text-white/40 mt-6">
-          Kingdom Books Admin · Staff Dashboard
+          {brand.adminLoginSubtitle}
         </p>
       </div>
     </div>

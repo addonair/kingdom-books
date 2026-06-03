@@ -13,7 +13,7 @@ const FEATURED_TRIO = [
   {
     title: 'Stationery & Gifts',
     eyebrow: 'Everyday Essentials',
-    desc: 'Notebooks, pens, planners and thoughtful gifts — curated for campus life.',
+    desc: 'Notebooks, pens, planners and thoughtful gifts — curated for everyday life.',
     cta: 'Shop stationery',
     link: '/shop?mainCategory=stationery',
     fallbackBg: 'linear-gradient(135deg, #C9920A 0%, #e6a80f 100%)',

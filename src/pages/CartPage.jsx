@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
-import { FREE_DELIVERY_THRESHOLD, DELIVERY_FEE } from '../config/delivery.js'
+import { useBrand } from '../context/BrandContext.jsx'
 
 function CoverThumb({ item }) {
   return (
@@ -50,6 +50,7 @@ function QtyControl({ qty, onDec, onInc }) {
 
 function CartPage() {
   const { items, subtotal, updateQuantity, removeFromCart } = useCart()
+  const brand = useBrand()
 
   if (items.length === 0) {
     return (
@@ -83,7 +84,7 @@ function CartPage() {
     )
   }
 
-  const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE
+  const deliveryFee = subtotal >= brand.freeDeliveryThreshold ? 0 : brand.deliveryFee
   const total = subtotal + deliveryFee
 
   return (
@@ -194,7 +195,7 @@ function CartPage() {
                 </div>
                 {deliveryFee > 0 && (
                   <p className="text-[11px] text-brand-navy/55 leading-relaxed">
-                    Spend GH₵ {(FREE_DELIVERY_THRESHOLD - subtotal).toFixed(2)}{' '}
+                    Spend GH₵ {(brand.freeDeliveryThreshold - subtotal).toFixed(2)}{' '}
                     more to qualify for free home delivery.
                   </p>
                 )}

@@ -15,6 +15,7 @@ import OrderDetailPage from './pages/OrderDetailPage'
 import AccountPage from './pages/AccountPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import ShopSmartPage from './pages/ShopSmartPage'
 import RequireAdmin from './components/RequireAdmin'
 import AdminLayout from './layouts/AdminLayout'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
@@ -27,6 +28,7 @@ import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
 import AdminPromotionsPage from './pages/admin/AdminPromotionsPage'
 import AdminEmailTemplatesPage from './pages/admin/AdminEmailTemplatesPage'
 import AdminReportsPage from './pages/admin/AdminReportsPage'
+import AdminDeliveryPage from './pages/admin/AdminDeliveryPage'
 import AdminSettingsPage from './pages/admin/AdminSettingsPage'
 
 function NotFoundPage() {
@@ -59,6 +61,7 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="shop" element={<ShopPage />} />
+        <Route path="shop-smart" element={<ShopSmartPage />} />
         <Route path="product/:id" element={<ProductPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
@@ -81,6 +84,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="homepage" element={<AdminHomepagePage />} />
+          <Route path="delivery" element={<AdminDeliveryPage />} />
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="customers" element={<AdminCustomersPage />} />

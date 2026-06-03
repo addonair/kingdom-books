@@ -3,6 +3,7 @@ import { getHomepage } from '../api/homepage.js'
 import { getProducts } from '../api/products.js'
 import { mapProducts } from '../api/productMapper.js'
 import useCategoryTree from '../hooks/useCategoryTree.js'
+import { useBrand } from '../context/BrandContext.jsx'
 
 import AnnouncementBarSection from '../components/homepage/AnnouncementBarSection.jsx'
 import HeroSection from '../components/homepage/HeroSection.jsx'
@@ -17,12 +18,12 @@ import FeaturedTrio from '../components/homepage/FeaturedTrio.jsx'
 // these values; when it fails or returns empty, the page still renders.
 const HARDCODED = {
   announcement: {
-    text: 'Free delivery on all campus orders over GH₵ 50 · Pay with Mobile Money or Card',
+    text: 'Free delivery on orders over GH₵ 50 · Pay with Mobile Money or Card',
     bg_color: '#000d1c',
   },
   hero: {
-    title: 'Books, stationery & gifts for the academic year',
-    subtitle: 'Search 12,000+ titles. Free delivery on the Legon campus. Pay with Mobile Money.',
+    title: 'Books, stationery & gifts for every reader',
+    subtitle: 'Search 12,000+ titles. Free delivery nationwide. Pay with Mobile Money.',
     bg_color: '#001a36',
     text_color: '#ffffff',
     button_text: 'Search',
@@ -32,9 +33,9 @@ const HARDCODED = {
   categories: { title: 'Shop by Section', max_items: 3 },
   bestsellers: { title: 'Bestsellers', strategy: 'auto', max_items: 5 },
   features: {
-    title: 'Why Kingdom Books',
+    title: 'Why Us',
     cards: [
-      { icon: 'truck', title: 'Free Delivery', description: 'On all campus orders over GH₵ 50 — same-day on Legon.' },
+      { icon: 'truck', title: 'Free Delivery', description: 'On all orders over GH₵ 50 — fast delivery to your door.' },
       { icon: 'return', title: '30-Day Returns', description: 'Bring it back unused for a full refund — no questions asked.' },
       { icon: 'gift', title: 'Gift Cards', description: 'Digital and physical gift cards from GH₵ 20 — perfect for any reader.' },
       { icon: 'phone', title: 'Mobile Money', description: 'Pay with MTN, Vodafone or AirtelTigo — instant confirmation.' },
@@ -77,6 +78,7 @@ function extractImageUrls(section) {
 }
 
 function HomePage() {
+  const brand = useBrand()
   // sections/settings start null so we render hardcoded content immediately.
   // The CMS fetch only fills them in if it succeeds — never blocks render.
   const [sections, setSections] = useState(null)
@@ -167,7 +169,7 @@ function HomePage() {
   }
 
   const featuresContent = {
-    title: featuresSection?.title || HARDCODED.features.title,
+    title: featuresSection?.title || `Why ${brand.storeNameShort}`,
     cards:
       Array.isArray(featuresSection?.content?.cards) && featuresSection.content.cards.length > 0
         ? featuresSection.content.cards

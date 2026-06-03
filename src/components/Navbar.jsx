@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useBrand } from '../context/BrandContext.jsx'
 import { POPULAR_AUTHORS } from '../data/categories.js'
 import useCategoryTree from '../hooks/useCategoryTree.js'
 
@@ -424,6 +425,7 @@ function StationeryMegaPanel({ onPick, subcats }) {
 
 function Navbar() {
   const { user, logout } = useAuth()
+  const brand = useBrand()
   const navigate = useNavigate()
   const [openMenu, setOpenMenu] = useState(null)
   const [searchInput, setSearchInput] = useState('')
@@ -455,15 +457,26 @@ function Navbar() {
         {/* Row 1: logo + Sign in + cart */}
         <div className="flex items-center justify-between gap-3 px-4 pt-3 pb-2">
           <Link to="/" className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-brand-gold flex items-center justify-center shrink-0">
-              {BookIcon}
-            </div>
-            <div className="leading-tight min-w-0">
-              <div className="font-serif text-[16px] leading-none truncate">Kingdom Books</div>
-              <div className="text-brand-gold text-[9px] uppercase tracking-[0.12em] mt-1">
-                & Stationery · UG
-              </div>
-            </div>
+            {brand.logoUrl ? (
+              <img
+                src={brand.logoUrl}
+                alt={brand.storeName}
+                style={{ height: brand.logoHeight || 40, maxWidth: 160 }}
+                className="object-contain"
+              />
+            ) : (
+              <>
+                <div className="w-9 h-9 rounded-lg bg-brand-gold flex items-center justify-center shrink-0">
+                  {BookIcon}
+                </div>
+                <div className="leading-tight min-w-0">
+                  <div className="font-serif text-[16px] leading-none truncate">{brand.storeNameShort}</div>
+                  <div className="text-brand-gold text-[9px] uppercase tracking-[0.12em] mt-1">
+                    {brand.taglineShort}
+                  </div>
+                </div>
+              </>
+            )}
           </Link>
           <div className="flex items-center gap-2 shrink-0">
             {user ? (
@@ -553,15 +566,26 @@ function Navbar() {
       {/* Desktop layout (md+): single row */}
       <div className="hidden md:flex items-center h-16 px-8 lg:px-10 gap-8">
         <Link to="/" className="flex items-center gap-3 shrink-0">
-          <div className="w-9 h-9 rounded-[10px] bg-brand-gold flex items-center justify-center">
-            {BookIcon}
-          </div>
-          <div className="leading-tight">
-            <div className="font-serif text-[19px] leading-none">Kingdom Books</div>
-            <div className="text-brand-gold text-[10px] uppercase tracking-[0.12em] mt-0.5">
-              & Stationery · UG
-            </div>
-          </div>
+          {brand.logoUrl ? (
+            <img
+              src={brand.logoUrl}
+              alt={brand.storeName}
+              style={{ height: brand.logoHeight || 40, maxWidth: 200 }}
+              className="object-contain"
+            />
+          ) : (
+            <>
+              <div className="w-9 h-9 rounded-[10px] bg-brand-gold flex items-center justify-center">
+                {BookIcon}
+              </div>
+              <div className="leading-tight">
+                <div className="font-serif text-[19px] leading-none">{brand.storeNameShort}</div>
+                <div className="text-brand-gold text-[10px] uppercase tracking-[0.12em] mt-0.5">
+                  {brand.taglineShort}
+                </div>
+              </div>
+            </>
+          )}
         </Link>
 
         <div className="h-7 w-px bg-white/15" />
@@ -624,6 +648,12 @@ function Navbar() {
               className="bg-transparent border-none outline-none text-[13px] text-white placeholder:text-brand-gold/70 flex-1 min-w-0"
             />
           </form>
+          <Link
+            to="/shop-smart"
+            className="hidden lg:flex items-center gap-1.5 text-[13px] font-bold text-brand-gold hover:text-brand-gold/80 transition-colors whitespace-nowrap"
+          >
+            ✨ Shop Smart
+          </Link>
           {user ? (
             <AccountMenu user={user} onLogout={handleLogout} />
           ) : (

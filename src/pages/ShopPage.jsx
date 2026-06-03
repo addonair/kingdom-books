@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
+import { useBrand } from '../context/BrandContext.jsx'
 import { sortOptions } from '../data/products.js'
 import {
   CONDITIONS,
@@ -25,6 +26,7 @@ const MAIN_CATEGORIES = [
 ]
 
 function ProductVisualSwatch({ p }) {
+  const brand = useBrand()
   return (
     <div
       className="absolute inset-0 flex items-center justify-center overflow-hidden"
@@ -200,7 +202,7 @@ function ProductVisualSwatch({ p }) {
             }}
           >
             <span className="font-serif text-base" style={{ color: p.color }}>
-              UG
+              {brand.storeNameShort.slice(0, 2).toUpperCase()}
             </span>
           </div>
         </div>

@@ -8,6 +8,7 @@ import {
 import { getProducts } from '../../api/products.js'
 import { mapProducts } from '../../api/productMapper.js'
 import useCategoryTree from '../../hooks/useCategoryTree.js'
+import { useBrand } from '../../context/BrandContext.jsx'
 import useDebounced from '../../hooks/useDebounced.js'
 import Modal from '../../components/Modal.jsx'
 import ImageUploadSlots from '../../components/admin/ImageUploadSlots.jsx'
@@ -52,7 +53,7 @@ const DEFAULT_DRAFTS = {
     product_ids: [],
   },
   categories: { title: 'Shop by Section', max_items: 3, category_slugs: [] },
-  features: { title: 'Why Kingdom Books', cards: [] },
+  features: { title: 'Why Shop With Us', cards: [] },
   featured_trio: { _images: [] },
 }
 

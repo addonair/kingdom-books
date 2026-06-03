@@ -56,8 +56,11 @@ const ICONS = {
   ),
 }
 
+import { useBrand } from '../../context/BrandContext.jsx'
+
 function FeaturesSection({ content }) {
-  const title = content?.title || 'Why Kingdom Books'
+  const brand = useBrand()
+  const title = content?.title || `Why ${brand.storeNameShort}`
   const cards = Array.isArray(content?.cards) ? content.cards.slice(0, 4) : []
 
   return (

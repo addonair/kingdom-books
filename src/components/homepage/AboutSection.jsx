@@ -1,8 +1,11 @@
+import { useBrand } from '../../context/BrandContext.jsx'
+
 function AboutSection({ content }) {
-  const title = content?.title || 'About Kingdom Books'
+  const brand = useBrand()
+  const title = content?.title || `About ${brand.storeNameShort}`
   const body =
     content?.body ||
-    'Serving the University of Ghana since 1991, we are the campus destination for academic books, stationery, and gifts.'
+    brand.aboutStory
   const bgColor = content?.bg_color || '#001a36'
   const stats = Array.isArray(content?.stats) ? content.stats.slice(0, 4) : []
 

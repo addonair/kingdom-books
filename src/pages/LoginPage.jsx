@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useBrand } from '../context/BrandContext.jsx'
 
 function LoginPage() {
   const [email, setEmail] = useState('')
@@ -8,6 +9,7 @@ function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const { login } = useAuth()
+  const brand = useBrand()
   const navigate = useNavigate()
 
   const onSubmit = async (e) => {
@@ -34,7 +36,7 @@ function LoginPage() {
               Welcome back
             </div>
             <h1 className="font-serif text-xl sm:text-2xl md:text-3xl text-brand-navy leading-tight">
-              Sign in to Kingdom Books
+              {brand.loginHeading}
             </h1>
             <p className="text-sm text-brand-navy/60 mt-2">
               Continue your shopping where you left off.

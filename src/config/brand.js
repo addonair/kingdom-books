@@ -1,0 +1,96 @@
+// Central brand configuration.
+// Edit values here OR save them from Admin → Settings → Store Branding
+// (admin-saved values override these defaults at runtime).
+
+const brand = {
+  // ── Logo ─────────────────────────────────────────────────────────────────
+  // Leave empty to use the built-in SVG icon + store name text.
+  // Set to a URL (e.g. '/logo.png' or a Cloudinary URL) to show your own logo.
+  logoUrl: '',
+  // Max height of your logo image in the navbar (px). Adjust to taste.
+  logoHeight: 40,
+
+  // ── Core identity ────────────────────────────────────────────────────────
+  storeName: 'Kingdom Books & Stationery',
+  storeNameShort: 'Kingdom Books',       // Navbar / compact spaces
+  tagline: 'Books, Stationery & Gifts',  // Sub-headline under the store name
+  taglineShort: 'Books & Stationery',    // Even shorter contexts
+
+  // ── About page ───────────────────────────────────────────────────────────
+  aboutHeroLabel: 'Our Story',
+  aboutHeroHeading: 'Serving our community',
+  aboutHeroSubtitle:
+    'Your local bookshop — books, stationery and gifts for every reader.',
+  aboutStoryHeading: 'A Bookshop Built for Readers',
+  aboutStory:
+    'We opened our doors with a simple promise: every student and reader should be able to find the right book at a fair price. That promise still guides us. We have grown from a single counter into a full-service bookshop stocking thousands of titles, premium stationery, and thoughtful gifts — but we still measure success the same way: by the customers we send home ready to learn, create, and grow.',
+
+  // ── Stats strip on About page ─────────────────────────────────────────────
+  stats: [
+    { number: '12k+', label: 'Titles in stock' },
+    { number: '24h',  label: 'Fast delivery' },
+    { number: '4.9★', label: 'Average rating' },
+    { number: '100%', label: 'Satisfaction' },
+  ],
+
+  // ── Why-us reasons on About page ──────────────────────────────────────────
+  reasons: [
+    {
+      title: 'Curated Selection',
+      desc: 'Required course texts plus general reading — hand-picked for our community.',
+    },
+    {
+      title: 'Trusted Quality',
+      desc: 'Every title and product is vetted for quality and value before it hits the shelf.',
+    },
+    {
+      title: 'Local Expertise',
+      desc: 'Staff who know the stock and can recommend confidently across every category.',
+    },
+    {
+      title: 'Built for Customers',
+      desc: 'Mobile Money payment, fast delivery, and fair prices that respect your budget.',
+    },
+  ],
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+  footerCopyright: `© ${new Date().getFullYear()} Kingdom Books & Stationery Ltd`,
+
+  // ── Contact card ─────────────────────────────────────────────────────────
+  contactStoreName: 'Kingdom Books & Stationery',
+
+  // ── Auth pages ────────────────────────────────────────────────────────────
+  loginHeading: 'Sign in to Kingdom Books',
+  registerSubtitle: 'Join Kingdom Books for faster checkout and order tracking.',
+
+  // ── Order confirmation ────────────────────────────────────────────────────
+  orderDeliveredThanks: 'Your order has been delivered. Thank you for shopping with us!',
+
+  // ── Account page ──────────────────────────────────────────────────────────
+  accountFooterLine: 'Kingdom Books & Stationery',
+
+  // ── Admin login ───────────────────────────────────────────────────────────
+  adminLoginSubtitle: 'Kingdom Books Admin · Staff Dashboard',
+
+  // ── Email templates ───────────────────────────────────────────────────────
+  emailHeaderSubtitle: 'Your Bookstore',
+  emailFooterLine: `© ${new Date().getFullYear()} Kingdom Books & Stationery`,
+
+  // ── Admin email subject default ───────────────────────────────────────────
+  adminOrderEmailSubjectPrefix: 'Your order #',
+
+  // ── Page <title> ─────────────────────────────────────────────────────────
+  pageTitle: 'Kingdom Books',
+
+  // ── Delivery & Pickup ─────────────────────────────────────────────────────
+  freeDeliveryThreshold: 50,
+  deliveryFee: 15,
+  pickupAddress: 'Main Store, Accra, Ghana',
+  pickupGpsCode: 'GA-044-0059',
+  pickupHours: 'Mon – Fri: 8:00am – 5:00pm  ·  Sat: 9:00am – 2:00pm',
+  pickupDescription:
+    'Pick up at our main store counter. Your order will be ready within 2 hours of payment confirmation.',
+  pickupPhone: '+233 20 000 0000',
+}
+
+export default brand
