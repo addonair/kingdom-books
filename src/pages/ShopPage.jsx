@@ -1225,7 +1225,7 @@ function ShopPage() {
       const slug = p.categorySlug
       if (mainLeaves && slug && !mainLeaves.has(slug)) return false
       if (subLeaves && slug && !subLeaves.has(slug)) return false
-      if (itemType && slug !== itemType) return false
+      if (itemType && slug !== itemType && (p.itemType || '').toLowerCase() !== itemType.toLowerCase()) return false
       if (aq && !(p.authorName || p.brand || '').toLowerCase().includes(aq)) return false
       if (sq) {
         const haystack = [p.title, p.authorName, p.brand, p.brandName, p.description, p.isbn]
