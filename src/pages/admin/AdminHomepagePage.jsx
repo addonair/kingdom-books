@@ -44,6 +44,9 @@ const DEFAULT_DRAFTS = {
     text_color: '#ffffff',
     button_text: 'Search',
     button_link: '/shop',
+    eyebrow_text: '',
+    title_size: 'lg',
+    eyebrow_position: 'above',
     _images: [],
   },
   bestsellers: {
@@ -154,6 +157,11 @@ function buildSectionPayload(type, draft, isVisible) {
       fd.append('text_color', draft.text_color || '#ffffff')
       fd.append('button_text', draft.button_text || '')
       fd.append('button_link', draft.button_link || '')
+      fd.append('content', JSON.stringify({
+        eyebrow_text: draft.eyebrow_text || '',
+        title_size: draft.title_size || 'lg',
+        eyebrow_position: draft.eyebrow_position || 'above',
+      }))
     }
     fd.append('is_visible', isVisible ? 'true' : 'false')
     const entries = Array.isArray(draft._images) ? draft._images : []
@@ -410,6 +418,41 @@ function AnnouncementBarEditor({ draft, setDraft }) {
 function HeroEditor({ draft, setDraft, isVisible, setIsVisible }) {
   return (
     <div className="space-y-4">
+      <div>
+        <label className={labelClass}>Text above / below title</label>
+        <input
+          className={inputClass}
+          value={draft.eyebrow_text || ''}
+          placeholder="The Number One Academic Bookshop in Ghana"
+          onChange={(e) => setDraft({ ...draft, eyebrow_text: e.target.value })}
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass}>Title font size</label>
+          <select
+            className={inputClass}
+            value={draft.title_size || 'lg'}
+            onChange={(e) => setDraft({ ...draft, title_size: e.target.value })}
+          >
+            <option value="sm">Small</option>
+            <option value="md">Medium</option>
+            <option value="lg">Large (default)</option>
+            <option value="xl">Extra Large</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>Eyebrow text position</label>
+          <select
+            className={inputClass}
+            value={draft.eyebrow_position || 'above'}
+            onChange={(e) => setDraft({ ...draft, eyebrow_position: e.target.value })}
+          >
+            <option value="above">Above title</option>
+            <option value="below">Below title</option>
+          </select>
+        </div>
+      </div>
       <div>
         <label className={labelClass}>Title</label>
         <input
@@ -980,7 +1023,7 @@ function FeaturedTrioEditor({ draft, setDraft, isVisible, setIsVisible }) {
 // Mobile iframe = 390px viewport → mobile layout.
 // The iframe always shows the PUBLISHED state; save first, then hit Refresh.
 
-const PREVIEW_URL = 'http://localhost:5173/'
+const PREVIEW_URL = typeof window !== 'undefined' ? window.location.origin + '/' : '/'
 const DESKTOP_IFRAME_W = 1280
 const DESKTOP_IFRAME_H = 860
 const DESKTOP_SCALE = 0.44

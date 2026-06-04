@@ -52,6 +52,15 @@ function HeroSection({ content, interactive = true }) {
   const images = Array.isArray(content?.images) ? content.images.filter(Boolean) : []
   const hasImages = images.length > 0
 
+  const eyebrowText = content?.eyebrow_text || 'The Number One Academic Bookshop in Ghana'
+  const eyebrowPosition = content?.eyebrow_position || 'above'
+  const titleSizeClass = {
+    sm: 'text-xl sm:text-2xl md:text-4xl lg:text-[36px]',
+    md: 'text-2xl sm:text-3xl md:text-5xl lg:text-[44px]',
+    lg: 'text-2xl sm:text-4xl md:text-6xl lg:text-[56px]',
+    xl: 'text-3xl sm:text-5xl md:text-7xl lg:text-[68px]',
+  }[content?.title_size || 'lg'] || 'text-2xl sm:text-4xl md:text-6xl lg:text-[56px]'
+
   // Auto-advance slideshow
   useEffect(() => {
     if (images.length <= 1) return
@@ -96,15 +105,22 @@ function HeroSection({ content, interactive = true }) {
 
       <div className="relative max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="max-w-2xl">
-          <div className="text-brand-gold text-[11px] md:text-xs uppercase tracking-[0.2em] mb-3">
-            The Number One Academic Bookshop in Ghana
-          </div>
+          {eyebrowPosition === 'above' && (
+            <div className="text-brand-gold text-[11px] md:text-xs uppercase tracking-[0.2em] mb-3">
+              {eyebrowText}
+            </div>
+          )}
           <h1
-            className="font-serif leading-[1.1] text-2xl sm:text-4xl md:text-7xl lg:text-[56px] mb-3 md:mb-5"
+            className={`font-serif leading-[1.1] ${titleSizeClass} mb-3 md:mb-5`}
             style={{ color: textColor }}
           >
             {title}
           </h1>
+          {eyebrowPosition === 'below' && (
+            <div className="text-brand-gold text-[11px] md:text-xs uppercase tracking-[0.2em] mb-3">
+              {eyebrowText}
+            </div>
+          )}
           <p className="text-sm md:text-base max-w-xl mb-6 md:mb-8" style={{ color: textColor, opacity: 0.75 }}>
             {subtitle}
           </p>
