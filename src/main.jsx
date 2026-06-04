@@ -7,6 +7,7 @@ import { CartProvider } from './context/CartContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { AdminAuthProvider } from './context/AdminAuthContext.jsx'
 import { BrandProvider } from './context/BrandContext.jsx'
+import { WishlistProvider } from './context/WishlistContext.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -16,9 +17,11 @@ createRoot(document.getElementById('root')).render(
         <BrandProvider>
           <AdminAuthProvider>
             <AuthProvider>
-              <CartProvider>
-                <App />
-              </CartProvider>
+              <WishlistProvider>
+                <CartProvider>
+                  <App />
+                </CartProvider>
+              </WishlistProvider>
             </AuthProvider>
           </AdminAuthProvider>
         </BrandProvider>

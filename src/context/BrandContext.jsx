@@ -31,6 +31,15 @@ const SETTINGS_MAP = {
   pickup_hours:         'pickupHours',
   pickup_description:   'pickupDescription',
   pickup_phone:         'pickupPhone',
+  // Legal pages (markdown)
+  terms_content:        'termsContent',
+  privacy_content:      'privacyContent',
+}
+
+// Keys whose admin value is a JSON-stringified array; parse safely or fall back to defaults.
+const JSON_ARRAY_KEYS = {
+  about_stats_json:   'stats',
+  about_reasons_json: 'reasons',
 }
 
 const BrandContext = createContext(defaults)
@@ -53,6 +62,19 @@ export function BrandProvider({ children }) {
         if (!isNaN(threshold) && threshold > 0) overrides.freeDeliveryThreshold = threshold
         const fee = Number(s.standard_delivery_fee)
         if (!isNaN(fee) && fee >= 0) overrides.deliveryFee = fee
+
+        // JSON-array fields — parse safely, ignore on malformed data
+        for (const [settingKey, brandKey] of Object.entries(JSON_ARRAY_KEYS)) {
+          const raw = s[settingKey]
+          if (typeof raw === 'string' && raw.trim()) {
+            try {
+              const parsed = JSON.parse(raw)
+              if (Array.isArray(parsed) && parsed.length > 0) overrides[brandKey] = parsed
+            } catch {
+              // Malformed JSON — keep brand.js default
+            }
+          }
+        }
 
         if (Object.keys(overrides).length > 0) {
           setBrand((prev) => ({ ...prev, ...overrides }))

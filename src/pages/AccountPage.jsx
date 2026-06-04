@@ -1,8 +1,6 @@
-import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useBrand } from '../context/BrandContext.jsx'
-import Modal from '../components/Modal.jsx'
 
 function getInitials(name) {
   if (!name) return '?'
@@ -77,90 +75,10 @@ function MenuRow({ to, onClick, icon, label, sublabel, danger, badge }) {
   )
 }
 
-function ComingSoonModal({ open, onClose, feature }) {
-  return (
-    <Modal open={open} onClose={onClose} title={feature} size="sm">
-      <div className="flex flex-col items-center text-center py-4 gap-4">
-        <span className="w-14 h-14 rounded-full bg-brand-gold-soft flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke="#C9920A" strokeWidth="1.8" />
-            <path d="M12 7v5l3 3" stroke="#C9920A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <div>
-          <p className="font-serif text-lg text-brand-navy mb-1">Coming Soon</p>
-          <p className="text-[14px] text-brand-navy/60 leading-relaxed">
-            <strong className="text-brand-navy">{feature}</strong> is being built and will be available soon.
-            Check back in a future update.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-1 px-6 py-2.5 rounded-xl bg-brand-navy text-white text-[14px] font-semibold hover:bg-brand-navy-soft transition-colors cursor-pointer"
-        >
-          Got it
-        </button>
-      </div>
-    </Modal>
-  )
-}
-
-function CloseAccountModal({ open, onClose, onConfirm }) {
-  const [confirm, setConfirm] = useState('')
-  const ready = confirm.toLowerCase() === 'close'
-
-  return (
-    <Modal open={open} onClose={onClose} title="Close Account" size="sm">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-error-bg border border-error/20">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-error shrink-0 mt-0.5">
-            <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <p className="text-[13px] text-error leading-relaxed">
-            This will permanently delete your account, order history, and all saved data. This action cannot be undone.
-          </p>
-        </div>
-        <div>
-          <label className="block text-[13px] font-semibold text-brand-navy mb-1.5">
-            Type <span className="font-mono text-error">close</span> to confirm
-          </label>
-          <input
-            type="text"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="close"
-            className="w-full border border-brand-line rounded-xl px-4 py-2.5 text-[14px] text-brand-navy outline-none focus:border-error focus:ring-2 focus:ring-error/20"
-          />
-        </div>
-        <div className="flex gap-3 pt-1">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-brand-line text-[14px] font-semibold text-brand-navy hover:bg-brand-page transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={!ready}
-            className="flex-1 py-2.5 rounded-xl bg-error text-white text-[14px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-700 transition-colors cursor-pointer"
-          >
-            Close Account
-          </button>
-        </div>
-      </div>
-    </Modal>
-  )
-}
-
 function AccountPage() {
   const { user, loading, logout } = useAuth()
   const brand = useBrand()
   const navigate = useNavigate()
-  const [closeAccountOpen, setCloseAccountOpen] = useState(false)
-  const [comingSoon, setComingSoon] = useState(null)
 
   if (loading) {
     return (
@@ -173,12 +91,6 @@ function AccountPage() {
   if (!user) return <Navigate to="/login" replace />
 
   const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-
-  const handleCloseAccount = () => {
-    setCloseAccountOpen(false)
     logout()
     navigate('/')
   }
@@ -202,7 +114,6 @@ function AccountPage() {
           </div>
           <Link
             to="/account/edit"
-            onClick={(e) => { e.preventDefault(); setComingSoon('Edit Profile') }}
             className="shrink-0 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center cursor-pointer"
             aria-label="Edit profile"
           >
@@ -247,9 +158,9 @@ function AccountPage() {
             }
           />
           <MenuRow
-            onClick={() => setComingSoon('Inbox')}
+            to="/account/inbox"
             label="Inbox"
-            sublabel="Messages and notifications"
+            sublabel="Order updates and messages"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
@@ -258,7 +169,7 @@ function AccountPage() {
             }
           />
           <MenuRow
-            onClick={() => setComingSoon('Wishlist')}
+            to="/account/wishlist"
             label="Wishlist"
             sublabel="Your saved items"
             icon={
@@ -273,9 +184,9 @@ function AccountPage() {
         <SectionLabel>Settings</SectionLabel>
         <section className="bg-white rounded-2xl shadow-sm border border-brand-line overflow-hidden divide-y divide-brand-line">
           <MenuRow
-            onClick={() => setComingSoon('Payment Settings')}
+            to="/account/payment"
             label="Payment Settings"
-            sublabel="Manage payment methods & billing"
+            sublabel="How payment works at checkout"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
@@ -284,9 +195,9 @@ function AccountPage() {
             }
           />
           <MenuRow
-            onClick={() => setComingSoon('Account Management')}
-            label="Account Management"
-            sublabel="Email, password & security"
+            to="/account/security"
+            label="Account & Security"
+            sublabel="Change password or close account"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
@@ -295,39 +206,12 @@ function AccountPage() {
             }
           />
           <MenuRow
-            onClick={() => setComingSoon('Notification Preferences')}
+            to="/account/notifications"
             label="Notification Preferences"
-            sublabel="Manage alerts and updates"
+            sublabel="Manage alerts and emails"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            }
-          />
-          <MenuRow
-            onClick={() => setComingSoon('More Settings')}
-            label="More Settings"
-            sublabel="Language, region & preferences"
-            icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
-                <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5h.1a1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v.1a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-              </svg>
-            }
-          />
-        </section>
-
-        {/* Danger zone */}
-        <section className="bg-white rounded-2xl shadow-sm border border-brand-line overflow-hidden mt-3">
-          <MenuRow
-            onClick={() => setCloseAccountOpen(true)}
-            label="Close Account"
-            sublabel="Permanently delete your account"
-            danger
-            icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             }
           />
@@ -358,15 +242,25 @@ function AccountPage() {
             }
           />
           <MenuRow
-            onClick={() => setComingSoon('Terms & Privacy')}
-            label="Terms & Privacy"
-            sublabel="Our policies and legal info"
+            to="/terms"
+            label="Terms of Service"
+            sublabel="Our terms and conditions"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            }
+          />
+          <MenuRow
+            to="/privacy"
+            label="Privacy Policy"
+            sublabel="How we handle your data"
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
               </svg>
             }
           />
@@ -390,18 +284,6 @@ function AccountPage() {
           {brand.accountFooterLine}
         </p>
       </div>
-
-      {/* Modals */}
-      <ComingSoonModal
-        open={!!comingSoon}
-        onClose={() => setComingSoon(null)}
-        feature={comingSoon || ''}
-      />
-      <CloseAccountModal
-        open={closeAccountOpen}
-        onClose={() => setCloseAccountOpen(false)}
-        onConfirm={handleCloseAccount}
-      />
     </div>
   )
 }

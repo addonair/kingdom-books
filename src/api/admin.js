@@ -112,6 +112,16 @@ export async function deleteCustomer(id) {
   return data
 }
 
+export async function getCustomer(id) {
+  const { data } = await client.get(`/admin/customers/${id}`)
+  return data.customer
+}
+
+export async function getCustomerOrders(id) {
+  const { data } = await client.get(`/admin/customers/${id}/orders`)
+  return data.orders
+}
+
 // The categories endpoint returns a nested tree: top-level rows each carry
 // a `children` array of subcategories, which in turn nest grandchildren.
 // Every consumer here expects a flat list with `parent_id` set, so we walk

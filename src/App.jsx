@@ -13,6 +13,14 @@ import PaymentVerifyPage from './pages/PaymentVerifyPage'
 import OrdersPage from './pages/OrdersPage'
 import OrderDetailPage from './pages/OrderDetailPage'
 import AccountPage from './pages/AccountPage'
+import AccountEditPage from './pages/AccountEditPage'
+import AccountSecurityPage from './pages/AccountSecurityPage'
+import InboxPage from './pages/InboxPage'
+import WishlistPage from './pages/WishlistPage'
+import PaymentSettingsPage from './pages/PaymentSettingsPage'
+import NotificationPreferencesPage from './pages/NotificationPreferencesPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ShopSmartPage from './pages/ShopSmartPage'
@@ -75,6 +83,14 @@ function App() {
         <Route path="orders" element={<OrdersPage />} />
         <Route path="orders/:id" element={<OrderDetailPage />} />
         <Route path="account" element={<AccountPage />} />
+        <Route path="account/edit" element={<AccountEditPage />} />
+        <Route path="account/security" element={<AccountSecurityPage />} />
+        <Route path="account/inbox" element={<InboxPage />} />
+        <Route path="account/wishlist" element={<WishlistPage />} />
+        <Route path="account/payment" element={<PaymentSettingsPage />} />
+        <Route path="account/notifications" element={<NotificationPreferencesPage />} />
+        <Route path="terms" element={<TermsPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 

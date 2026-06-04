@@ -31,7 +31,32 @@ const BRANDING_KEYS = [
   'about_hero_subtitle',
   'about_story_heading',
   'about_story',
+  'terms_content',
+  'privacy_content',
 ]
+
+const DEFAULT_STATS = [
+  { number: '12k+', label: 'Titles in stock' },
+  { number: '24h', label: 'Fast delivery' },
+  { number: '4.9★', label: 'Average rating' },
+  { number: '100%', label: 'Satisfaction' },
+]
+const DEFAULT_REASONS = [
+  { title: 'Curated Selection', desc: 'Required course texts plus general reading — hand-picked for our community.' },
+  { title: 'Trusted Quality', desc: 'Every title and product is vetted for quality and value before it hits the shelf.' },
+  { title: 'Local Expertise', desc: 'Staff who know the stock and can recommend confidently across every category.' },
+  { title: 'Built for Customers', desc: 'Mobile Money payment, fast delivery, and fair prices that respect your budget.' },
+]
+
+function parseJsonArray(raw, fallback) {
+  if (typeof raw !== 'string' || !raw.trim()) return fallback
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : fallback
+  } catch {
+    return fallback
+  }
+}
 
 function SectionCard({ title, description, children }) {
   return (
@@ -88,7 +113,11 @@ function AdminSettingsPage() {
     about_hero_subtitle: '',
     about_story_heading: '',
     about_story: '',
+    terms_content: '',
+    privacy_content: '',
   })
+  const [aboutStats, setAboutStats] = useState(DEFAULT_STATS)
+  const [aboutReasons, setAboutReasons] = useState(DEFAULT_REASONS)
   const [passwordForm, setPasswordForm] = useState({
     current_password: '',
     new_password: '',
@@ -140,7 +169,11 @@ function AdminSettingsPage() {
           about_hero_subtitle: s.about_hero_subtitle || '',
           about_story_heading: s.about_story_heading || '',
           about_story: s.about_story || '',
+          terms_content: s.terms_content || '',
+          privacy_content: s.privacy_content || '',
         })
+        setAboutStats(parseJsonArray(s.about_stats_json, DEFAULT_STATS))
+        setAboutReasons(parseJsonArray(s.about_reasons_json, DEFAULT_REASONS))
       })
       .catch((err) => {
         if (!cancelled)
@@ -199,6 +232,8 @@ function AdminSettingsPage() {
     try {
       const payload = {}
       for (const k of BRANDING_KEYS) payload[k] = brandingForm[k] ?? ''
+      payload.about_stats_json = JSON.stringify(aboutStats)
+      payload.about_reasons_json = JSON.stringify(aboutReasons)
       await updateSettings(payload)
       setBrandingStatus({ kind: 'success', message: 'Branding saved. Reload the storefront to see changes.' })
     } catch (err) {
@@ -575,7 +610,88 @@ function AdminSettingsPage() {
                 />
               </div>
               <p className="text-[11px] text-brand-navy/40 mt-3">
-                Leave any field blank to fall back to the built-in default. Stats and "Why shop with us" reasons stay hardcoded in <code className="bg-brand-line px-1 rounded">src/config/brand.js</code> for now.
+                Leave any text field blank to fall back to the built-in default.
+              </p>
+
+              {/* Stats repeater */}
+              <div className="mt-5 pt-5 border-t border-brand-line/60">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-brand-navy/40 mb-3">Stats strip <span className="normal-case font-normal text-brand-navy/50">— 4 number/label pairs shown under the hero</span></p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {aboutStats.map((stat, i) => (
+                    <div key={i} className="flex items-start gap-2 p-3 bg-brand-page rounded-xl border border-brand-line">
+                      <div className="text-[10px] font-bold text-brand-navy/40 mt-2 w-4">{i + 1}</div>
+                      <div className="flex-1 space-y-2">
+                        <input
+                          className={`${inputClass} h-9 text-[13px]`}
+                          placeholder="Number (e.g. 12k+)"
+                          value={stat.number || ''}
+                          onChange={(e) => setAboutStats((arr) => arr.map((s, idx) => idx === i ? { ...s, number: e.target.value } : s))}
+                        />
+                        <input
+                          className={`${inputClass} h-9 text-[13px]`}
+                          placeholder="Label (e.g. Titles in stock)"
+                          value={stat.label || ''}
+                          onChange={(e) => setAboutStats((arr) => arr.map((s, idx) => idx === i ? { ...s, label: e.target.value } : s))}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reasons repeater */}
+              <div className="mt-5 pt-5 border-t border-brand-line/60">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-brand-navy/40 mb-3">Why shop with us <span className="normal-case font-normal text-brand-navy/50">— 4 reasons shown below the story</span></p>
+                <div className="space-y-3">
+                  {aboutReasons.map((reason, i) => (
+                    <div key={i} className="flex items-start gap-2 p-3 bg-brand-page rounded-xl border border-brand-line">
+                      <div className="text-[10px] font-bold text-brand-navy/40 mt-2 w-4">{i + 1}</div>
+                      <div className="flex-1 space-y-2">
+                        <input
+                          className={`${inputClass} h-9 text-[13px]`}
+                          placeholder="Title (e.g. Curated Selection)"
+                          value={reason.title || ''}
+                          onChange={(e) => setAboutReasons((arr) => arr.map((r, idx) => idx === i ? { ...r, title: e.target.value } : r))}
+                        />
+                        <textarea
+                          rows={2}
+                          className={`${inputClass} h-auto py-2 text-[13px] resize-y`}
+                          placeholder="Description"
+                          value={reason.desc || ''}
+                          onChange={(e) => setAboutReasons((arr) => arr.map((r, idx) => idx === i ? { ...r, desc: e.target.value } : r))}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Legal pages (markdown) */}
+            <div className="border-t border-brand-line pt-4">
+              <p className="text-[11px] uppercase tracking-wider font-bold text-brand-navy/40 mb-3">Legal pages <span className="normal-case font-normal text-brand-navy/50">— markdown supported (##, **bold**, lists)</span></p>
+              <div>
+                <label className={labelClass}>Terms of Service</label>
+                <textarea
+                  rows={10}
+                  className={`${inputClass} h-auto py-3 resize-y font-mono text-[12px]`}
+                  placeholder="# Terms of Service&#10;&#10;Your terms here…"
+                  value={brandingForm.terms_content}
+                  onChange={(e) => setBrandingForm((f) => ({ ...f, terms_content: e.target.value }))}
+                />
+              </div>
+              <div className="mt-4">
+                <label className={labelClass}>Privacy Policy</label>
+                <textarea
+                  rows={10}
+                  className={`${inputClass} h-auto py-3 resize-y font-mono text-[12px]`}
+                  placeholder="# Privacy Policy&#10;&#10;Your policy here…"
+                  value={brandingForm.privacy_content}
+                  onChange={(e) => setBrandingForm((f) => ({ ...f, privacy_content: e.target.value }))}
+                />
+              </div>
+              <p className="text-[11px] text-brand-navy/40 mt-3">
+                <strong>Important:</strong> The store owner is responsible for keeping legal copy accurate. Built-in defaults are placeholders only.
               </p>
             </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
+import { useWishlist } from '../context/WishlistContext.jsx'
 import { getProduct, getProducts } from '../api/products.js'
 import { mapProduct, mapProducts } from '../api/productMapper.js'
 import ImgWithFallback from '../components/ImgWithFallback.jsx'
@@ -176,6 +177,13 @@ function NotFound({ id }) {
 function ProductPage() {
   const { id } = useParams()
   const { addToCart } = useCart()
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist()
+  const navigate = useNavigate()
+  const wishlisted = isWishlisted(Number(id))
+  async function onWishlistToggle() {
+    const result = await toggleWishlist(Number(id))
+    if (result?.needsAuth) navigate('/login')
+  }
 
   const [product, setProduct] = useState(null)
   const [allProducts, setAllProducts] = useState([])
@@ -183,7 +191,6 @@ function ProductPage() {
   const [notFound, setNotFound] = useState(false)
   const [selectedFormat, setSelectedFormat] = useState(formatOptions[0])
   const [qty, setQty] = useState(1)
-  const [wishlisted, setWishlisted] = useState(false)
   const [activeThumb, setActiveThumb] = useState(0)
   const [activeTab, setActiveTab] = useState('description')
 
@@ -521,7 +528,7 @@ function ProductPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setWishlisted((w) => !w)}
+                onClick={onWishlistToggle}
                 className={`sm:flex-1 inline-flex items-center justify-center gap-2 border-2 rounded-xl px-5 py-3.5 text-sm font-bold transition-colors ${
                   wishlisted
                     ? 'border-error text-error bg-error-bg'

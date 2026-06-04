@@ -86,6 +86,52 @@ const brand = {
   // ── Page <title> ─────────────────────────────────────────────────────────
   pageTitle: 'Kingdom Books',
 
+  // ── Legal pages (markdown) ────────────────────────────────────────────────
+  termsContent: `# Terms of Service
+
+Welcome to Kingdom Books. By using this site, you agree to these terms.
+
+## 1. Orders
+We accept orders at our discretion and reserve the right to refuse service.
+
+## 2. Payments
+Payment is processed securely through Paystack. We do not store your card details.
+
+## 3. Delivery
+Delivery times are estimates. We are not liable for delays caused by third parties.
+
+## 4. Returns
+Contact us within 7 days of receipt for refund or exchange requests.
+
+## 5. Account
+You are responsible for keeping your password secure.
+
+*The store owner is responsible for keeping these terms accurate and legally compliant.*`,
+  privacyContent: `# Privacy Policy
+
+Kingdom Books respects your privacy.
+
+## What we collect
+- Name and email (for account + order processing)
+- Delivery address (per order)
+- Payment reference (from Paystack — no card details)
+
+## How we use it
+- Fulfilling your orders
+- Sending order updates
+- Improving our service
+
+## Sharing
+We do not sell your data. We share only with delivery partners and Paystack as required to complete orders.
+
+## Your rights
+You can edit or delete your account at any time from your account settings.
+
+## Contact
+Reach us via the Contact page for any privacy questions.
+
+*The store owner is responsible for keeping this policy accurate and legally compliant.*`,
+
   // ── Delivery & Pickup ─────────────────────────────────────────────────────
   freeDeliveryThreshold: 50,
   deliveryFee: 15,

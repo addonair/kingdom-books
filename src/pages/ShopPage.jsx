@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
 import { useBrand } from '../context/BrandContext.jsx'
+import { useWishlist } from '../context/WishlistContext.jsx'
 import { sortOptions } from '../data/products.js'
 import {
   CONDITIONS,
@@ -917,7 +918,8 @@ function ShopPage() {
   const [condition, setCondition] = useState('')
   const [filter, setFilter] = useState('')
   const [sortBy, setSortBy] = useState('Relevance')
-  const [wishlist, setWishlist] = useState([])
+  const { isWishlisted, toggle: toggleWishlistApi } = useWishlist()
+  const navigate = useNavigate()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [drawerEnter, setDrawerEnter] = useState(false)
   const [products, setProducts] = useState([])
@@ -1178,8 +1180,10 @@ function ShopPage() {
     setItemType('')
   }, [])
 
-  const toggleWishlist = (id) =>
-    setWishlist((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+  const toggleWishlist = async (id) => {
+    const result = await toggleWishlistApi(id)
+    if (result?.needsAuth) navigate('/login')
+  }
 
   const clearAll = () => {
     setMainCategory('')
@@ -1491,7 +1495,7 @@ function ShopPage() {
                 <ProductCard
                   key={p.id}
                   p={p}
-                  wishlisted={wishlist.includes(p.id)}
+                  wishlisted={isWishlisted(p.id)}
                   onToggleWishlist={toggleWishlist}
                   onAddToCart={addToCart}
                 />

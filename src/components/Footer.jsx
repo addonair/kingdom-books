@@ -10,6 +10,8 @@ function Footer() {
         <div className="flex items-center gap-6">
           <Link to="/about" className="hover:text-brand-gold transition-colors">About Us</Link>
           <Link to="/contact" className="hover:text-brand-gold transition-colors">Contact</Link>
+          <Link to="/privacy" className="hover:text-brand-gold transition-colors">Privacy</Link>
+          <Link to="/terms" className="hover:text-brand-gold transition-colors">Terms</Link>
         </div>
       </div>
     </footer>

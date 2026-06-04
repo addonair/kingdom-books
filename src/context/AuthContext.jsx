@@ -63,9 +63,36 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const updateProfile = useCallback(async (payload) => {
+    const u = await authApi.updateProfile(payload)
+    setUser(u)
+    return u
+  }, [])
+
+  const changePassword = useCallback(
+    (current_password, new_password) =>
+      authApi.changePassword(current_password, new_password),
+    [],
+  )
+
+  const closeAccount = useCallback(async () => {
+    await authApi.deleteAccount()
+    localStorage.removeItem(TOKEN_KEY)
+    setUser(null)
+  }, [])
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      updateProfile,
+      changePassword,
+      closeAccount,
+    }),
+    [user, loading, login, register, logout, updateProfile, changePassword, closeAccount],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

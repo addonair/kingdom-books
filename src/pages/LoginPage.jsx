@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useBrand } from '../context/BrandContext.jsx'
 
@@ -11,6 +11,8 @@ function LoginPage() {
   const { login } = useAuth()
   const brand = useBrand()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const suspended = params.get('suspended') === '1'
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -42,6 +44,12 @@ function LoginPage() {
               Continue your shopping where you left off.
             </p>
           </div>
+
+          {suspended && (
+            <div className="bg-error-bg text-error border border-error/20 rounded-xl p-3 mb-4 text-[13px]">
+              Your session ended because this account has been suspended. Please contact support if you think this is a mistake.
+            </div>
+          )}
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>

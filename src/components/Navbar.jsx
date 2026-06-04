@@ -167,7 +167,7 @@ function AccountMenu({ user, onLogout }) {
               My Orders
             </Link>
             <Link
-              to="/account"
+              to="/account/inbox"
               onClick={() => setOpen(false)}
               role="menuitem"
               className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-brand-navy hover:bg-brand-page transition-colors cursor-pointer"
@@ -178,13 +178,24 @@ function AccountMenu({ user, onLogout }) {
               </svg>
               Inbox
             </Link>
+            <Link
+              to="/account/wishlist"
+              onClick={() => setOpen(false)}
+              role="menuitem"
+              className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-brand-navy hover:bg-brand-page transition-colors cursor-pointer"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M12 21s-7-4.5-9.5-9C.8 8.7 2.6 5 6 5c2 0 3.5 1.2 4 2.5C10.5 6.2 12 5 14 5c3.4 0 5.2 3.7 3.5 7C19 16.5 12 21 12 21z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+              </svg>
+              Wishlist
+            </Link>
           </div>
 
           {/* Settings */}
           <div className="border-t border-brand-line py-1">
             <div className="px-4 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-[0.1em] text-brand-muted">Settings</div>
             <Link
-              to="/account"
+              to="/account/payment"
               onClick={() => setOpen(false)}
               role="menuitem"
               className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-brand-navy hover:bg-brand-page transition-colors cursor-pointer"
@@ -196,16 +207,27 @@ function AccountMenu({ user, onLogout }) {
               Payment Settings
             </Link>
             <Link
-              to="/account"
+              to="/account/security"
               onClick={() => setOpen(false)}
               role="menuitem"
               className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-brand-navy hover:bg-brand-page transition-colors cursor-pointer"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
-                <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5h.1a1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v.1a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
-              More Settings
+              Account &amp; Security
+            </Link>
+            <Link
+              to="/account/notifications"
+              onClick={() => setOpen(false)}
+              role="menuitem"
+              className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-brand-navy hover:bg-brand-page transition-colors cursor-pointer"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Notifications
             </Link>
           </div>
 

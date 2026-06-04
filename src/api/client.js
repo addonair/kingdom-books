@@ -29,6 +29,25 @@ const client = axios.create({
 })
 client.interceptors.request.use((config) => attachToken(config, getToken()))
 
+// If the backend reports the user is suspended mid-session, wipe the local
+// token and bounce to the login page with a flag so the page can show a
+// friendly banner. Only triggers on 403 with the exact "Account suspended" reason.
+client.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const status = err?.response?.status
+    const reason = err?.response?.data?.error || ''
+    if (status === 403 && /suspended/i.test(reason) && localStorage.getItem(TOKEN_KEY)) {
+      localStorage.removeItem(TOKEN_KEY)
+      // Avoid redirecting if we're already on the login page (prevents loop).
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.replace('/login?suspended=1')
+      }
+    }
+    return Promise.reject(err)
+  },
+)
+
 export const adminClient = axios.create({
   baseURL,
   headers: { 'Content-Type': 'application/json' },
