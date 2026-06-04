@@ -26,6 +26,11 @@ const BRANDING_KEYS = [
   'account_footer_line',
   'email_header_subtitle',
   'email_footer_line',
+  'about_hero_label',
+  'about_hero_heading',
+  'about_hero_subtitle',
+  'about_story_heading',
+  'about_story',
 ]
 
 function SectionCard({ title, description, children }) {
@@ -78,6 +83,11 @@ function AdminSettingsPage() {
     account_footer_line: '',
     email_header_subtitle: '',
     email_footer_line: '',
+    about_hero_label: '',
+    about_hero_heading: '',
+    about_hero_subtitle: '',
+    about_story_heading: '',
+    about_story: '',
   })
   const [passwordForm, setPasswordForm] = useState({
     current_password: '',
@@ -125,6 +135,11 @@ function AdminSettingsPage() {
           account_footer_line: s.account_footer_line || '',
           email_header_subtitle: s.email_header_subtitle || '',
           email_footer_line: s.email_footer_line || '',
+          about_hero_label: s.about_hero_label || '',
+          about_hero_heading: s.about_hero_heading || '',
+          about_hero_subtitle: s.about_hero_subtitle || '',
+          about_story_heading: s.about_story_heading || '',
+          about_story: s.about_story || '',
         })
       })
       .catch((err) => {
@@ -516,7 +531,51 @@ function AdminSettingsPage() {
                 </div>
               </div>
               <p className="text-[11px] text-brand-navy/40 mt-3">
-                Edit actual email subjects and body text in <strong>Admin → Email Templates</strong>. Edit About page copy in <code className="bg-brand-line px-1 rounded">src/config/brand.js</code>.
+                Edit actual email subjects and body text in <strong>Admin → Email Templates</strong>.
+              </p>
+            </div>
+
+            {/* About page */}
+            <div className="border-t border-brand-line pt-4">
+              <p className="text-[11px] uppercase tracking-wider font-bold text-brand-navy/40 mb-3">About page</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Hero label <span className="normal-case font-normal text-brand-navy/50">— small eyebrow text above the hero</span></label>
+                  <input className={inputClass} placeholder={brand.aboutHeroLabel}
+                    value={brandingForm.about_hero_label}
+                    onChange={(e) => setBrandingForm((f) => ({ ...f, about_hero_label: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={labelClass}>Hero heading <span className="normal-case font-normal text-brand-navy/50">— big title</span></label>
+                  <input className={inputClass} placeholder={brand.aboutHeroHeading}
+                    value={brandingForm.about_hero_heading}
+                    onChange={(e) => setBrandingForm((f) => ({ ...f, about_hero_heading: e.target.value }))} />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className={labelClass}>Hero subtitle <span className="normal-case font-normal text-brand-navy/50">— one-line description under the heading</span></label>
+                <input className={inputClass} placeholder={brand.aboutHeroSubtitle}
+                  value={brandingForm.about_hero_subtitle}
+                  onChange={(e) => setBrandingForm((f) => ({ ...f, about_hero_subtitle: e.target.value }))} />
+              </div>
+              <div className="mt-4">
+                <label className={labelClass}>Story heading</label>
+                <input className={inputClass} placeholder={brand.aboutStoryHeading}
+                  value={brandingForm.about_story_heading}
+                  onChange={(e) => setBrandingForm((f) => ({ ...f, about_story_heading: e.target.value }))} />
+              </div>
+              <div className="mt-4">
+                <label className={labelClass}>Story body <span className="normal-case font-normal text-brand-navy/50">— main paragraph</span></label>
+                <textarea
+                  rows={6}
+                  className={`${inputClass} h-auto py-3 resize-y`}
+                  placeholder={brand.aboutStory}
+                  value={brandingForm.about_story}
+                  onChange={(e) => setBrandingForm((f) => ({ ...f, about_story: e.target.value }))}
+                />
+              </div>
+              <p className="text-[11px] text-brand-navy/40 mt-3">
+                Leave any field blank to fall back to the built-in default. Stats and "Why shop with us" reasons stay hardcoded in <code className="bg-brand-line px-1 rounded">src/config/brand.js</code> for now.
               </p>
             </div>
 

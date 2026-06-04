@@ -1,6 +1,10 @@
-// Central brand configuration.
-// Edit values here OR save them from Admin → Settings → Store Branding
-// (admin-saved values override these defaults at runtime).
+// Central brand configuration — default values used when admin hasn't customized.
+// Most text fields below are admin-editable from Admin → Settings → Store Branding
+// (admin-saved values override these defaults at runtime via BrandContext).
+// Exceptions still hardcoded for now: `stats` and `reasons` on the About page,
+// `adminOrderEmailSubjectPrefix`, and the delivery/pickup numeric defaults
+// (those live in the settings table under their own keys but aren't surfaced in the
+// branding form — see Delivery Settings and Admin → Delivery page instead).
 
 const brand = {
   // ── Logo ─────────────────────────────────────────────────────────────────
