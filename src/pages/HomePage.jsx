@@ -142,6 +142,7 @@ function HomePage() {
   // Build resolved content — API value if present, else hardcoded fallback.
   const heroImages = extractImageUrls(heroSection)
   const heroContent = {
+    ...(heroSection?.content || {}),
     title: heroSection?.title || HARDCODED.hero.title,
     subtitle: heroSection?.subtitle || HARDCODED.hero.subtitle,
     bg_color: heroSection?.background_color || HARDCODED.hero.bg_color,
